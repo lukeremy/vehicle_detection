@@ -238,7 +238,7 @@ class MainInit(QMainWindow, main_ui):
 
     # Function Tab 3. Log
     def searchLog(self):
-        headerLabel = ["No", "Date", "Time", "Type", "Speed", "Picture"]
+        hLabel = ["No", "Date", "Time", "Type", "Speed", "Picture"]
         row = 4
         column = 6
 
@@ -247,7 +247,7 @@ class MainInit(QMainWindow, main_ui):
 
         self.tableWidget_searchLog.setRowCount(row)
         self.tableWidget_searchLog.setColumnCount(column)
-        self.tableWidget_searchLog.setHorizontalHeaderLabels(headerLabel)
+        self.tableWidget_searchLog.setHorizontalHeaderLabels(hLabel)
 
         self.tableWidget_searchLog.setItem(0, 0, QTableWidgetItem("Item (0,0)"))
         self.tableWidget_searchLog.setItem(0, 1, QTableWidgetItem("Item (3,0)"))

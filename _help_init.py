@@ -26,11 +26,3 @@ class HelpInit(QWidget, help_ui):
     def printContentFile(self, file):
         pars = self.parsingContentFile(file)
         self.label_content.setText(pars)
-
-
-#if __name__ == '__main__':
-#    App = QApplication(sys.argv)
-    # App.setStyle('cleanlooks')
-#    myHelpWindow = HelpInit(None)
-#    myHelpWindow.show()
-#    App.exec_()

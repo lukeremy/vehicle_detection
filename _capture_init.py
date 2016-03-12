@@ -1,14 +1,16 @@
 import cv2
 import numpy as np
-import vehicle_tracking as vtrack
+import vehicle_tracking as proc
+import time
 
 from PyQt4 import QtGui, QtCore
 from PyQt4 import uic
 
 main_ui = uic.loadUiType("gtk/video_frame.ui")[0]
-width = 960
-height = 540
-
+start_time = None
+width = 960     # pixel
+height = 540    # pixel
+alpha = 5       # second
 
 class QtCapture(QtGui.QFrame, main_ui):
     def __init__(self, fps, filename):
@@ -25,9 +27,13 @@ class QtCapture(QtGui.QFrame, main_ui):
         self.fps = fps
 
     def start(self):
+        global start_time
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.nextFrame)
-        self.timer.start(1000./self.fps)
+        self.timer.start(1000. / self.fps)
+        start_time = time.time()
+        print format(start_time)
+        return start_time
 
     def stop(self):
         self.timer.stop()
@@ -41,12 +47,20 @@ class QtCapture(QtGui.QFrame, main_ui):
 
         # ---------- Do not disturb this source code ---------- #
         # Default color model is BGR format
-        frame_ori = cv2.resize(frame_ori, (width, height))      # resize video frame for fits within the frame
-        rgb_frame = cv2.cvtColor(frame_ori, cv2.COLOR_BGR2RGB)  # convert from BGR color model to RGB color model
+        frame_ori = proc.resize(frame_ori, width, height)       # resize video frame for fits within the frame
+        rgb_frame = proc.convBGR2RGB(frame_ori)                 # convert from BGR color model to RGB color model
         # ----------------------------------------------------- #
 
         # Function for operation the feature
-        gray_frame = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2GRAY)
+        gray_frame = proc.convRGB2GRAY(rgb_frame)               # convert from RGB to Gray scale
+
+        # Get background subtraction from moving object
+        real_time = time.time()
+        if real_time > start_time + alpha:
+            print "sudah lebih waktunya"
+        else:
+            print real_time
+
         # bin_frame = cv2.threshold(gray_frame, 20, 255, cv2.THRESH_BINARY)
         # ret, thresh = cv2.threshold(gray_frame, 127, 255, 0)
         # Edge Detection
@@ -61,11 +75,7 @@ class QtCapture(QtGui.QFrame, main_ui):
         # 9cv2.rectangle(gray_frame, (200, 300), (500, 500), (0, 255, 255), 2, 0, 0)
 
         # Add Text
-        #font = cv2.FONT_HERSHEY_PLAIN
-        #gambar = "budiman"
-        #cv2.putText(gray_frame, "{0}".format(gambar), (100, 300), font, 0.9, (255, 255, 0), 1)
-
-        vtrack.addText(gray_frame, "kesatu", 100, 300)
+        proc.addText(gray_frame, "kesatu", 100, 300)
 
         # Last variable to show must 'show_frame'
         show_frame = gray_frame
@@ -77,5 +87,3 @@ class QtCapture(QtGui.QFrame, main_ui):
         pix = QtGui.QPixmap.fromImage(img)
         self.video_frame.setPixmap(pix)
         # ------------------------------------------------------ #
-
-
