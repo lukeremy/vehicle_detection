@@ -48,7 +48,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <property name="elideMode">
      <enum>Qt::ElideNone</enum>
@@ -241,10 +241,10 @@
      <widget class="QGroupBox" name="groupBox_3DataInput">
       <property name="geometry">
        <rect>
-        <x>20</x>
-        <y>310</y>
+        <x>530</x>
+        <y>20</y>
         <width>411</width>
-        <height>281</height>
+        <height>521</height>
        </rect>
       </property>
       <property name="title">
@@ -413,32 +413,6 @@
         </property>
        </widget>
       </widget>
-      <widget class="QPushButton" name="pushButton_helpSetting">
-       <property name="geometry">
-        <rect>
-         <x>300</x>
-         <y>250</y>
-         <width>21</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>?</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton_setSetting">
-       <property name="geometry">
-        <rect>
-         <x>329</x>
-         <y>250</y>
-         <width>71</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Set</string>
-       </property>
-      </widget>
       <widget class="QGroupBox" name="groupBox_dataInputSpeedCam">
        <property name="geometry">
         <rect>
@@ -478,6 +452,93 @@
         </property>
        </widget>
       </widget>
+      <widget class="QGroupBox" name="groupBox_dataInputThreshold">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>240</y>
+         <width>391</width>
+         <height>131</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Threshold</string>
+       </property>
+       <widget class="QLabel" name="label_initBackgroundSecond">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>30</y>
+          <width>46</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>second</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_initBackground">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>26</y>
+          <width>91</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_initBackground">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>30</y>
+          <width>141</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Initiation background</string>
+        </property>
+       </widget>
+      </widget>
+     </widget>
+     <widget class="QPushButton" name="pushButton_setSetting">
+      <property name="geometry">
+       <rect>
+        <x>890</x>
+        <y>570</y>
+        <width>71</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Set</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_helpSetting">
+      <property name="geometry">
+       <rect>
+        <x>860</x>
+        <y>570</y>
+        <width>21</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>?</string>
+      </property>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_video">

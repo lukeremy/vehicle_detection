@@ -57,7 +57,6 @@ class MainInit(QMainWindow, main_ui):
         self.comboBox_choseDevice.currentIndexChanged.connect(self.selectionDevice)
 
         # 1.2.  VideoMode
-
         self.radioButton_rgbVM.setChecked(True)
         self.radioButton_gsVM.setChecked(False)
         self.radioButton_hsvVM.setChecked(False)
@@ -81,7 +80,6 @@ class MainInit(QMainWindow, main_ui):
 
         # 2.    Video
         # 2.1   Video Player
-        # self.pushButton_pauseVideo.clicked.connect(self.pauseVideo)
         self.pushButton_startVideo.clicked.connect(self.startVideo)
         # self.pushButton_stopVideo.clicked.connect(self.stopVideo)
         self.pushButton_showLog.setVisible(False)
@@ -197,7 +195,7 @@ class MainInit(QMainWindow, main_ui):
 
     def helpSetting(self):
         title = "Panduan Singkat"
-        filename = "config/uji.txt"
+        filename = "conf/help.txt"
 
         print "Open new popup help"
         self.help_win = HelpInit(title, filename, None)
