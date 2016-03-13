@@ -12,7 +12,7 @@ main_ui = uic.loadUiType("gtk/main.ui")[0]
 help_ui = uic.loadUiType("gtk/help.ui")[0]
 
 # Variable
-fileLoc = None
+fileLoc = 0
 
 
 class MainInit(QMainWindow, main_ui):
@@ -24,7 +24,7 @@ class MainInit(QMainWindow, main_ui):
         self.setupUi(self)
         self.capture = None
 
-        port_cam = ["", "0", "1", "2"]
+        port_cam = ["0", "1", "2"]
         filename = None
         video_mode = None
         boundary = None
@@ -43,18 +43,19 @@ class MainInit(QMainWindow, main_ui):
         self.tabWidget.setTabEnabled(2, False)
 
         # 1.1.  VideoInput
-        self.radioButton_choseFile.setChecked(True)
-        self.radioButton_choseDevice.setChecked(False)
+        self.radioButton_choseDevice.setChecked(True)
+        self.radioButton_choseFile.setChecked(False)
 
         self.radioButton_choseFile.toggled.connect(self.radioChoseFile)
         self.radioButton_choseDevice.toggled.connect(self.radioChoseDevice)
 
-        self.label_selectFile.setText('')
-        self.pushButton_selectFile.clicked.connect(self.selectFile)
-
-        self.comboBox_choseDevice.setEnabled(False)
+        self.comboBox_choseDevice.setEnabled(True)
         self.comboBox_choseDevice.addItems(port_cam)
         self.comboBox_choseDevice.currentIndexChanged.connect(self.selectionDevice)
+
+        self.label_selectFile.setText('')
+        self.pushButton_selectFile.setEnabled(False)
+        self.pushButton_selectFile.clicked.connect(self.selectFile)
 
         # 1.2.  VideoMode
         self.radioButton_rgbVM.setChecked(True)
@@ -68,11 +69,14 @@ class MainInit(QMainWindow, main_ui):
         # 1.3.1 Camera
         self.lineEdit_altitudeCam.setText(format("100"))
         self.lineEdit_elevatedCam.setText(format("30"))
-        self.lineEdit_fps.setText(format(fps))
+        self.lineEdit_fps.setText(format("20"))
 
         # 1.3.2 SpeedDetection
         self.radioButton_EuclideanModel.setChecked(True)
         self.radioButton_PinHoleModel.setChecked(False)
+
+        # 1.3.3 Thresholding
+        self.lineEdit_initBackground.setText(format("20"))
 
         # 1.4 Button Help and Set
         self.pushButton_helpSetting.clicked.connect(self.helpSetting)
@@ -87,8 +91,8 @@ class MainInit(QMainWindow, main_ui):
 
         # 2.2   Capture
         # self.tableView_Capture()
-        self.lcdNumber_ShortVehicle.display("140")
-        self.lcdNumber_LongVehicle.display("130")
+        self.label_countShortVehicle.setText("140")
+        self.label_countLongVehicle.setText("130")
         self.label_videoFps.setText("fps : {0}/second".format("20"))
 
         # 3.    Log
@@ -104,8 +108,8 @@ class MainInit(QMainWindow, main_ui):
 
         # 3.2   View Log
         # self.tableView_searchLog()
-        self.lcdNumber_logShortVehicle.display("20")
-        self.lcdNumber_logLongVehicle.display("20")
+        self.label_logcountShortVehicle.setText("20")
+        self.label_logcountLongVehicle.setText("100")
 
     # Function Menu Bar
     # Menu File
@@ -149,8 +153,10 @@ class MainInit(QMainWindow, main_ui):
             self.pushButton_selectFile.setEnabled(False)
 
     def radioChoseDevice(self, enabled):
+        global fileLoc
         if enabled:
             self.comboBox_choseDevice.setEnabled(True)
+            fileLoc = 0
         else:
             self.comboBox_choseDevice.setEnabled(False)
 
@@ -180,6 +186,9 @@ class MainInit(QMainWindow, main_ui):
         elif self.radioButton_PinHoleModel.isChecked():
             speed_method = "pinhole"
 
+        # Threshold
+        init_background = self.lineEdit_initBackground.text()
+
         print "Camera Input"
         print "video input: {0}".format(fileLoc)
         print "video mode: {0}".format(video_mode)
@@ -187,7 +196,7 @@ class MainInit(QMainWindow, main_ui):
         print "roi: {0}".format(roi)
         print "speed detection: {0}".format(speed_method)
         print "alt: {0} | elevated: {1} | fps: {2}".format(alt, elevated, fps)
-
+        print "initialization background time : {0}".format(init_background)
         time.sleep(1)
 
         self.tabWidget.setTabEnabled(1, True)
@@ -199,6 +208,7 @@ class MainInit(QMainWindow, main_ui):
 
         print "Open new popup help"
         self.help_win = HelpInit(title, filename, None)
+        #self.help_win.setModal(True)
         self.help_win.show()
 
     # Function Tab 2. Video

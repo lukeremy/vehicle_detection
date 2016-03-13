@@ -48,7 +48,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <property name="elideMode">
      <enum>Qt::ElideNone</enum>
@@ -82,7 +82,7 @@
        <property name="geometry">
         <rect>
          <x>140</x>
-         <y>55</y>
+         <y>25</y>
          <width>51</width>
          <height>25</height>
         </rect>
@@ -92,7 +92,7 @@
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>30</y>
+         <y>60</y>
          <width>82</width>
          <height>17</height>
         </rect>
@@ -105,7 +105,7 @@
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>60</y>
+         <y>30</y>
          <width>111</width>
          <height>17</height>
         </rect>
@@ -118,7 +118,7 @@
        <property name="geometry">
         <rect>
          <x>140</x>
-         <y>26</y>
+         <y>56</y>
          <width>31</width>
          <height>25</height>
         </rect>
@@ -134,7 +134,7 @@
        <property name="geometry">
         <rect>
          <x>180</x>
-         <y>30</y>
+         <y>60</y>
          <width>231</width>
          <height>20</height>
         </rect>
@@ -163,7 +163,7 @@
        <property name="geometry">
         <rect>
          <x>210</x>
-         <y>40</y>
+         <y>30</y>
          <width>141</width>
          <height>22</height>
         </rect>
@@ -176,7 +176,7 @@
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>70</y>
+         <y>60</y>
          <width>131</width>
          <height>22</height>
         </rect>
@@ -189,7 +189,7 @@
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>100</y>
+         <y>90</y>
          <width>131</width>
          <height>22</height>
         </rect>
@@ -202,7 +202,7 @@
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>130</y>
+         <y>120</y>
          <width>121</width>
          <height>22</height>
         </rect>
@@ -215,7 +215,7 @@
        <property name="geometry">
         <rect>
          <x>20</x>
-         <y>40</y>
+         <y>30</y>
          <width>102</width>
          <height>22</height>
         </rect>
@@ -228,7 +228,7 @@
        <property name="geometry">
         <rect>
          <x>210</x>
-         <y>70</y>
+         <y>60</y>
          <width>211</width>
          <height>22</height>
         </rect>
@@ -419,7 +419,7 @@
          <x>10</x>
          <y>150</y>
          <width>381</width>
-         <height>80</height>
+         <height>111</height>
         </rect>
        </property>
        <property name="title">
@@ -451,12 +451,25 @@
          <string>Euclidean Model</string>
         </property>
        </widget>
+       <widget class="QRadioButton" name="radioButton_RegistrationLine">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>90</y>
+          <width>171</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Registration Line </string>
+        </property>
+       </widget>
       </widget>
       <widget class="QGroupBox" name="groupBox_dataInputThreshold">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>240</y>
+         <y>280</y>
          <width>391</width>
          <height>131</height>
         </rect>
@@ -584,29 +597,10 @@
        <string>Pause</string>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="lcdNumber_ShortVehicle">
-      <property name="geometry">
-       <rect>
-        <x>170</x>
-        <y>560</y>
-        <width>60</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <strikeout>false</strikeout>
-        <kerning>true</kerning>
-       </font>
-      </property>
-      <property name="value" stdset="0">
-       <double>0.000000000000000</double>
-      </property>
-     </widget>
      <widget class="QLabel" name="label_ShortVehicle">
       <property name="geometry">
        <rect>
-        <x>30</x>
+        <x>20</x>
         <y>560</y>
         <width>81</width>
         <height>16</height>
@@ -619,7 +613,7 @@
      <widget class="QLabel" name="label_LongVehicle">
       <property name="geometry">
        <rect>
-        <x>30</x>
+        <x>20</x>
         <y>580</y>
         <width>81</width>
         <height>16</height>
@@ -627,16 +621,6 @@
       </property>
       <property name="text">
        <string>Long Vehicle</string>
-      </property>
-     </widget>
-     <widget class="QLCDNumber" name="lcdNumber_LongVehicle">
-      <property name="geometry">
-       <rect>
-        <x>170</x>
-        <y>580</y>
-        <width>60</width>
-        <height>16</height>
-       </rect>
       </property>
      </widget>
      <widget class="QLabel" name="video_frame">
@@ -679,6 +663,44 @@
       </property>
       <property name="text">
        <string>TextLabel</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_countShortVehicle">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>560</y>
+        <width>56</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Box</enum>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_countLongVehicle">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>580</y>
+        <width>56</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Box</enum>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </widget>
@@ -830,26 +852,6 @@
        <string>Short Vehicle</string>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="lcdNumber_logLongVehicle">
-      <property name="geometry">
-       <rect>
-        <x>170</x>
-        <y>580</y>
-        <width>60</width>
-        <height>16</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLCDNumber" name="lcdNumber_logShortVehicle">
-      <property name="geometry">
-       <rect>
-        <x>170</x>
-        <y>560</y>
-        <width>60</width>
-        <height>16</height>
-       </rect>
-      </property>
-     </widget>
      <widget class="QTableWidget" name="tableWidget_searchLog">
       <property name="geometry">
        <rect>
@@ -867,6 +869,44 @@
       </property>
       <property name="dragDropOverwriteMode">
        <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_logcountShortVehicle">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>560</y>
+        <width>56</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Box</enum>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_logcountLongVehicle">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>580</y>
+        <width>56</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Box</enum>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </widget>

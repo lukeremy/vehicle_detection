@@ -11,6 +11,7 @@ start_time = None
 width = 960     # pixel
 height = 540    # pixel
 alpha = 5       # second
+mask = False
 
 class QtCapture(QtGui.QFrame, main_ui):
     def __init__(self, fps, filename):
@@ -25,6 +26,7 @@ class QtCapture(QtGui.QFrame, main_ui):
 
         # Initiation to motion blur
         _, frame = self.cap.read()
+        frame = proc.convBGR2RGB(frame)
         avg = np.float32(frame)
 
     def setFPS(self, fps):
@@ -44,25 +46,32 @@ class QtCapture(QtGui.QFrame, main_ui):
 
     def deleteLater(self):
         self.cap.release()
-        super(QtGui.QWidget, self).deleteLater()
+        super(QtGui.QFrame, self).deleteLater()
 
     def nextFrame(self):
+        global mask
         real_time = time.time()
         ret, frame_ori = self.cap.read()
 
-        # ---------- Do not disturb this
-        #
-        # source code ---------- #
+        # ---------- Do not disturb this source code ---------- #
         # Default color model is BGR format
         rgb_frame = proc.convBGR2RGB(frame_ori)                 # convert from BGR color model to RGB color model
         # ----------------------------------------------------- #
 
         # Initiation background subtraction
-        acu = cv2.accumulateWeighted(rgb_frame, avg, 0.01)
-        subtract_frame = cv2.convertScaleAbs(acu)               # return rgb color for background subtraction
+        acuWeight = cv2.accumulateWeighted(rgb_frame, avg, 0.01)
+        subtract_frame = cv2.convertScaleAbs(acuWeight)               # return rgb color for background subtraction
 
         # Initiation
-        proc.initBackgrounSubtraction(real_time, start_time, alpha)
+        initBackground = proc.initBackgrounSubtraction(real_time, start_time, alpha)
+
+        if not mask:
+            if not initBackground:
+                print "initsialsisasi background"
+            else:
+                mask = True
+        else:
+            print "last frame"
 
         # Image processing
         gray_frame = proc.convRGB2GRAY(rgb_frame)

@@ -6,7 +6,7 @@ help_ui = uic.loadUiType("gtk/help.ui")[0]
 file_txt = "config/uji.txt"
 
 
-class HelpInit(QWidget, help_ui):
+class HelpInit(QDialog, help_ui):
     def __init__(self, title, file, parent=None):
         # Initialization help interface from QT to Python
 
