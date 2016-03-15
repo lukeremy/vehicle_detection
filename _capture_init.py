@@ -6,12 +6,14 @@ import time
 from PyQt4 import QtGui, QtCore
 from PyQt4 import uic
 
+# Global variable
 main_ui = uic.loadUiType("gtk/video_frame.ui")[0]
 start_time = None
 width = 960     # pixel
 height = 540    # pixel
-alpha = 5       # second
-mask = False
+alpha = 8       # second
+mask_status = False
+mask_frame = None
 
 class QtCapture(QtGui.QFrame, main_ui):
     def __init__(self, fps, filename):
@@ -49,7 +51,7 @@ class QtCapture(QtGui.QFrame, main_ui):
         super(QtGui.QFrame, self).deleteLater()
 
     def nextFrame(self):
-        global mask
+        global mask_status, mask_frame
         real_time = time.time()
         ret, frame_ori = self.cap.read()
 
@@ -59,34 +61,34 @@ class QtCapture(QtGui.QFrame, main_ui):
         # ----------------------------------------------------- #
 
         # Initiation background subtraction
+        # Motion blur object subtraction
         acuWeight = cv2.accumulateWeighted(rgb_frame, avg, 0.01)
-        subtract_frame = cv2.convertScaleAbs(acuWeight)               # return rgb color for background subtraction
-
-        # Initiation
+        initSubtrack = cv2.convertScaleAbs(acuWeight)               # return rgb color for background subtraction
         initBackground = proc.initBackgrounSubtraction(real_time, start_time, alpha)
 
-        if not mask:
+        if not mask_status:
             if not initBackground:
-                print "initsialsisasi background"
+                print "initiation background subtraction"
             else:
-                mask = True
+                print "mask found"
+                mask_frame = initSubtrack
+                mask_status = True
+            subtract_frame = initSubtrack
         else:
-            print "last frame"
+            print "mask frame"
+            subtract_frame = mask_frame
 
         # Image processing
-        gray_frame = proc.convRGB2GRAY(rgb_frame)
-
-        # Add Text
-        proc.addText(gray_frame, "kesatu", 100, 300)
+        gray_frame = proc.convRGB2GRAY(initSubtrack)
 
         # Last variable to show must 'show_frame'
-        show_frame = subtract_frame
+        show_frame = gray_frame
         show_frame = cv2.resize(show_frame, (width, height))    # resize frame
 
         # ---------- Do not disturb this source code ----------- #
         # Gray scale, binary image - Format_Indexed8
         # RGB image - Format_RGB888
-        img = QtGui.QImage(show_frame, show_frame.shape[1], show_frame.shape[0], QtGui.QImage.Format_RGB888)
+        img = QtGui.QImage(show_frame, show_frame.shape[1], show_frame.shape[0], QtGui.QImage.Format_Indexed8)
         pix = QtGui.QPixmap.fromImage(img)
         self.video_frame.setPixmap(pix)
         # ------------------------------------------------------ #

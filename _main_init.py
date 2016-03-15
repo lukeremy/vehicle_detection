@@ -65,20 +65,31 @@ class MainInit(QMainWindow, main_ui):
         self.checkBox_showboundaryVM.setChecked(False)
         self.checkBox_showroiVM.setChecked(False)
 
-        # 1.3   Data Input
-        # 1.3.1 Camera
+        # 1.3 Background Subtraction
+        self.radioButton_BsMOG.setChecked(True)
+        self.radioButton_BsKNN.setChecked(False)
+        self.radioButton_BsMBO.setChecked(False)
+        self.radioButton_BsCB.setChecked(False)
+
+        self.label_initBackground.setEnabled(False)
+        self.lineEdit_initBackground.setEnabled(False)
+        self.label_initBackgroundSecond.setEnabled(False)
+
+        self.radioButton_BsMBO.toggled.connect(self.radioMBO)
+        # 1.4   Data Input
+        # 1.4.1 Camera
         self.lineEdit_altitudeCam.setText(format("100"))
         self.lineEdit_elevatedCam.setText(format("30"))
         self.lineEdit_fps.setText(format("20"))
 
-        # 1.3.2 SpeedDetection
+        # 1.4.2 SpeedDetection
         self.radioButton_EuclideanModel.setChecked(True)
         self.radioButton_PinHoleModel.setChecked(False)
 
-        # 1.3.3 Thresholding
-        self.lineEdit_initBackground.setText(format("20"))
+        # 1.4.3 Thresholds
+        # self.lineEdit_initBackground.setText(format("20"))
 
-        # 1.4 Button Help and Set
+        # 1.5 Button Help and Set
         self.pushButton_helpSetting.clicked.connect(self.helpSetting)
         self.pushButton_setSetting.clicked.connect(self.setSetting)
 
@@ -159,6 +170,16 @@ class MainInit(QMainWindow, main_ui):
             fileLoc = 0
         else:
             self.comboBox_choseDevice.setEnabled(False)
+
+    def radioMBO(self, enabled):
+        if enabled:
+            self.label_initBackground.setEnabled(True)
+            self.lineEdit_initBackground.setEnabled(True)
+            self.label_initBackgroundSecond.setEnabled(True)
+        else:
+            self.label_initBackground.setEnabled(False)
+            self.lineEdit_initBackground.setEnabled(False)
+            self.label_initBackgroundSecond.setEnabled(False)
 
     def setSetting(self):
         # Get data video mode

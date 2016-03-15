@@ -48,7 +48,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <property name="elideMode">
      <enum>Qt::ElideNone</enum>
@@ -238,7 +238,7 @@
        </property>
       </widget>
      </widget>
-     <widget class="QGroupBox" name="groupBox_3DataInput">
+     <widget class="QGroupBox" name="groupBox_4DataInput">
       <property name="geometry">
        <rect>
         <x>530</x>
@@ -248,7 +248,7 @@
        </rect>
       </property>
       <property name="title">
-       <string>3. Data Input</string>
+       <string>4. Data Input</string>
       </property>
       <widget class="QGroupBox" name="groupBox_datainputCamera">
        <property name="geometry">
@@ -477,54 +477,6 @@
        <property name="title">
         <string>Threshold</string>
        </property>
-       <widget class="QLabel" name="label_initBackgroundSecond">
-        <property name="geometry">
-         <rect>
-          <x>330</x>
-          <y>30</y>
-          <width>46</width>
-          <height>13</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>second</string>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="lineEdit_initBackground">
-        <property name="geometry">
-         <rect>
-          <x>220</x>
-          <y>26</y>
-          <width>91</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="layoutDirection">
-         <enum>Qt::LeftToRight</enum>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="frame">
-         <bool>true</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_initBackground">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>30</y>
-          <width>141</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Initiation background</string>
-        </property>
-       </widget>
       </widget>
      </widget>
      <widget class="QPushButton" name="pushButton_setSetting">
@@ -552,6 +504,119 @@
       <property name="text">
        <string>?</string>
       </property>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_3BackgroundSubtraction">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>290</y>
+        <width>391</width>
+        <height>221</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>3. Background Subtraction</string>
+      </property>
+      <widget class="QRadioButton" name="radioButton_BsMOG">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>30</y>
+         <width>321</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Mixture of Gaussian Bacground Subtraction (MOG)</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radioButton_BsKNN">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>60</y>
+         <width>321</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Kernel Nearest Neighbors (KNN)</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radioButton_BsMBO">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>90</y>
+         <width>321</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Motion Blur Object (MBO)</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_initBackground">
+       <property name="geometry">
+        <rect>
+         <x>46</x>
+         <y>120</y>
+         <width>141</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Initiation background</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEdit_initBackground">
+       <property name="geometry">
+        <rect>
+         <x>200</x>
+         <y>116</y>
+         <width>81</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="frame">
+        <bool>true</bool>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_initBackgroundSecond">
+       <property name="geometry">
+        <rect>
+         <x>300</x>
+         <y>120</y>
+         <width>46</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>second</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radioButton_BsCB">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>140</y>
+         <width>331</width>
+         <height>22</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Code Book (CB)</string>
+       </property>
+      </widget>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_video">

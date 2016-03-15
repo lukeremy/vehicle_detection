@@ -1,63 +1,36 @@
-# Main Library
 import cv2
-import numpy as np
-import os
-import pygame
 
-# Additional Library
-#import mainInterface
-# from ui_imagedialog import Ui_ImageDialog
+img1 = cv2.imread("samples/enigma1.jpg")
+img2 = cv2.imread("samples/enigma2.jpg")
+img3 = cv2.imread("samples/enigma3.jpg")
+img4 = cv2.imread("samples/enigma4.jpg")
 
-# os.chdir("/")
-# vid_file_ori = "/home/auzan/PycharmProjects/VehicleCounting/assets/IP Camera Highway Surveillance.mp4"
+# mask
+mask1 = (img1/2 + img2/2)
+mask2 = (mask1/2 + img3/2)
+mask3 = (mask2/2 + img4/2)
 
-vid_file_ori = "assets/IP Camera Highway Surveillance.mp4"
-iteration = 1
-cap = cv2.VideoCapture(vid_file_ori)
-height = 960
-width = 540
+mk1 = (img1 + img2)/2
+mk2 = (mk1 + img3)/2
+mk3 = (mk2 + img4)/2
+#img2=cv2.imread(pict1,2)
+#gray1 = cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY)
+img3 = (img1/2 + img4/2)
 
-while True:
-    # Capture frame by frame
-    ret, frame_ori = cap.read()
-    iteration += 1
+gray1= cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY)
+gray2= cv2.cvtColor(img2, cv2.COLOR_RGB2GRAY)
+subtrack = gray2 - gray1
 
-    if iteration == 30:
-        iteration = 1
+m1 = cv2.addWeighted(img1,0.5,img2,0.5,0)
+m2 = cv2.addWeighted(m1, 0.5, img3, 0.5,0)
+m3 = cv2.addWeighted(m2, 0.5, img4, 0.5,0)
 
-    # FrameRate
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    print "Frame per second {0}".format(fps)
-
-    # Operation on the frameq
-    assert isinstance(frame_ori, object)
-    #frame_ori = cv2.resize(frame_ori, (height, width), interpolation = cv2.INTER_CUBIC)
-    gray_frame = cv2.cvtColor(frame_ori, cv2.COLOR_BGR2GRAY)
-    hsv_frame = cv2.cvtColor(frame_ori, cv2.COLOR_BGR2HSV)
-    h_fhsv, s_fhsv, v_fhsv = cv2.split(hsv_frame)
-
-    # Edge detection
-    edge_frame = cv2.Canny(gray_frame, 100, 200)
-
-    # Morphology Operation
-    kernel = np.ones((2, 2), np.uint8)
-    erosi = cv2.dilate(edge_frame, kernel, iterations=1)
-
-    # Add rectangle for every vehicle
-    cv2.rectangle(frame_ori, (200 + iteration, 300 + iteration), (500, 500), (0, 255, 255), 2, 0, 0)
-
-    # Add Text
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    gambar = "budiman"
-    cv2.putText(frame_ori, "{0}".format(gambar), (100, 300), font, 0.9, (255, 255, 0), 2)
-
-    # Display the result
-    cv2.imshow('grayscale frame', edge_frame)
-    print "iteration {0}", format(iteration)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+frame = cv2.resize(m3, (600, 400))
+fram2 = cv2.resize(subtrack, (600, 400))
+cv2.imshow('frame',subtrack)
+#cv2.imshow('frame2',fram2)
 
 
-# When everything done, release the capture
-cap.release()
+cv2.waitKey(0)
+
 cv2.destroyAllWindows()
