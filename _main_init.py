@@ -75,7 +75,9 @@ class MainInit(QMainWindow, main_ui):
         self.lineEdit_initBackground.setEnabled(False)
         self.label_initBackgroundSecond.setEnabled(False)
 
+        self.lineEdit_initBackground.setText("20")
         self.radioButton_BsMBO.toggled.connect(self.radioMBO)
+
         # 1.4   Data Input
         # 1.4.1 Camera
         self.lineEdit_altitudeCam.setText(format("100"))
@@ -182,7 +184,10 @@ class MainInit(QMainWindow, main_ui):
             self.label_initBackgroundSecond.setEnabled(False)
 
     def setSetting(self):
-        # Get data video mode
+        # Variable
+        initMBO = None
+
+        # Get video mode
         if self.radioButton_rgbVM.isChecked():
             video_mode = "rgb"
         elif self.radioButton_gsVM.isChecked():
@@ -192,11 +197,22 @@ class MainInit(QMainWindow, main_ui):
         elif self.radioButton_edVM.isChecked():
             video_mode = "edg"
 
-        # Get data video mode
+        # Get video mode
         boundary = self.checkBox_showboundaryVM.isChecked()
         roi = self.checkBox_showroiVM.isChecked()
 
-        # Get data camera from setting
+        # Get background subtraction
+        if self.radioButton_BsMOG.isChecked():
+            background_subtraction = "mog"
+        elif self.radioButton_BsKNN.isChecked():
+            background_subtraction = "knn"
+        elif self.radioButton_BsMBO.isChecked():
+            background_subtraction = "mbo"
+            initMBO = self.lineEdit_initBackground.text()
+        elif self.radioButton_BsCB.isChecked():
+            background_subtraction = "cb"
+
+        # Get camera setting
         alt = self.lineEdit_altitudeCam.text()
         elevated = self.lineEdit_elevatedCam.text()
         fps = self.lineEdit_fps.text()
@@ -208,16 +224,16 @@ class MainInit(QMainWindow, main_ui):
             speed_method = "pinhole"
 
         # Threshold
-        init_background = self.lineEdit_initBackground.text()
 
         print "Camera Input"
         print "video input: {0}".format(fileLoc)
         print "video mode: {0}".format(video_mode)
+        print "background subtraction: {0}".format(background_subtraction)
+        print "init time bsMBO: {0}".format(initMBO)
         print "boundary: {0}".format(boundary)
         print "roi: {0}".format(roi)
         print "speed detection: {0}".format(speed_method)
         print "alt: {0} | elevated: {1} | fps: {2}".format(alt, elevated, fps)
-        print "initialization background time : {0}".format(init_background)
         time.sleep(1)
 
         self.tabWidget.setTabEnabled(1, True)

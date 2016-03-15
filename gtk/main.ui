@@ -527,7 +527,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Mixture of Gaussian Bacground Subtraction (MOG)</string>
+        <string>Mixture of Gaussian (MOG)</string>
        </property>
       </widget>
       <widget class="QRadioButton" name="radioButton_BsKNN">
