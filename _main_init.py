@@ -61,6 +61,7 @@ class MainInit(QMainWindow, main_ui):
         self.radioButton_rgbVM.setChecked(True)
         self.radioButton_gsVM.setChecked(False)
         self.radioButton_hsvVM.setChecked(False)
+        self.radioButton_labVM.setChecked(False)
         self.radioButton_edVM.setChecked(False)
         self.checkBox_showboundaryVM.setChecked(False)
         self.checkBox_showroiVM.setChecked(False)
@@ -194,6 +195,8 @@ class MainInit(QMainWindow, main_ui):
             video_mode = "gs"
         elif self.radioButton_hsvVM.isChecked():
             video_mode = "hsv"
+        elif self.radioButton_labVM.isChecked():
+            video_mode = "lab"
         elif self.radioButton_edVM.isChecked():
             video_mode = "edg"
 
@@ -245,7 +248,6 @@ class MainInit(QMainWindow, main_ui):
 
         print "Open new popup help"
         self.help_win = HelpInit(title, filename, None)
-        #self.help_win.setModal(True)
         self.help_win.show()
 
     # Function Tab 2. Video
