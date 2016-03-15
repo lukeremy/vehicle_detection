@@ -69,15 +69,15 @@ class MainInit(QMainWindow, main_ui):
         # 1.3 Background Subtraction
         self.radioButton_BsMOG.setChecked(True)
         self.radioButton_BsKNN.setChecked(False)
-        self.radioButton_BsMBO.setChecked(False)
+        self.radioButton_BsMA.setChecked(False)
         self.radioButton_BsCB.setChecked(False)
 
         self.label_initBackground.setEnabled(False)
         self.lineEdit_initBackground.setEnabled(False)
         self.label_initBackgroundSecond.setEnabled(False)
 
-        self.lineEdit_initBackground.setText("20")
-        self.radioButton_BsMBO.toggled.connect(self.radioMBO)
+        self.lineEdit_initBackground.setText("8")
+        self.radioButton_BsMA.toggled.connect(self.radioMBO)
 
         # 1.4   Data Input
         # 1.4.1 Camera
@@ -209,8 +209,8 @@ class MainInit(QMainWindow, main_ui):
             background_subtraction = "mog"
         elif self.radioButton_BsKNN.isChecked():
             background_subtraction = "knn"
-        elif self.radioButton_BsMBO.isChecked():
-            background_subtraction = "mbo"
+        elif self.radioButton_BsMA.isChecked():
+            background_subtraction = "ma"
             initMBO = self.lineEdit_initBackground.text()
         elif self.radioButton_BsCB.isChecked():
             background_subtraction = "cb"

@@ -279,7 +279,7 @@
         </font>
        </property>
        <property name="title">
-        <string>Camera</string>
+        <string>Camera Position</string>
        </property>
        <widget class="QLabel" name="label_altitude">
         <property name="geometry">
@@ -425,6 +425,16 @@
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
+       <zorder>label_altitude</zorder>
+       <zorder>lineEdit_altitudeCam</zorder>
+       <zorder>label_altMeter</zorder>
+       <zorder>label_elevated</zorder>
+       <zorder>lineEdit_elevatedCam</zorder>
+       <zorder>label_elvDegree</zorder>
+       <zorder>label_fps</zorder>
+       <zorder>label_fpersecond</zorder>
+       <zorder>lineEdit_fps</zorder>
+       <zorder>groupBox_dataInputSpeedCam</zorder>
       </widget>
       <widget class="QGroupBox" name="groupBox_dataInputSpeedCam">
        <property name="geometry">
@@ -432,7 +442,7 @@
          <x>10</x>
          <y>150</y>
          <width>381</width>
-         <height>111</height>
+         <height>151</height>
         </rect>
        </property>
        <property name="title">
@@ -469,12 +479,126 @@
          <rect>
           <x>20</x>
           <y>90</y>
-          <width>171</width>
+          <width>231</width>
           <height>17</height>
          </rect>
         </property>
         <property name="text">
-         <string>Registration Line </string>
+         <string>Detection and Registration Line </string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_detectionLine">
+        <property name="geometry">
+         <rect>
+          <x>46</x>
+          <y>110</y>
+          <width>101</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Detection Line</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_registrationLine">
+        <property name="geometry">
+         <rect>
+          <x>46</x>
+          <y>132</y>
+          <width>121</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Registration Line</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_regisX1">
+        <property name="geometry">
+         <rect>
+          <x>170</x>
+          <y>108</y>
+          <width>31</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_regisX2">
+        <property name="geometry">
+         <rect>
+          <x>170</x>
+          <y>130</y>
+          <width>31</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_regisY1">
+        <property name="geometry">
+         <rect>
+          <x>210</x>
+          <y>108</y>
+          <width>31</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_regisY2">
+        <property name="geometry">
+         <rect>
+          <x>210</x>
+          <y>130</y>
+          <width>31</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </widget>
@@ -482,9 +606,9 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>280</y>
+         <y>310</y>
          <width>391</width>
-         <height>131</height>
+         <height>101</height>
         </rect>
        </property>
        <property name="title">
@@ -556,7 +680,7 @@
         <string>Kernel Nearest Neighbors (KNN)</string>
        </property>
       </widget>
-      <widget class="QRadioButton" name="radioButton_BsMBO">
+      <widget class="QRadioButton" name="radioButton_BsMA">
        <property name="geometry">
         <rect>
          <x>20</x>
@@ -566,7 +690,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Motion Blur Object (MBO)</string>
+        <string>Moving Average (MA)</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_initBackground">
