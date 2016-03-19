@@ -9,6 +9,7 @@ from PyQt4 import uic
 # Global variable
 main_ui = uic.loadUiType("gtk/video_frame.ui")[0]
 
+# init variable
 start_time = None
 width = 960     # pixel
 height = 540    # pixel
@@ -16,6 +17,12 @@ alpha = 8       # second
 mask_status = False
 mask_frame = None
 frame = 0
+
+# background subtraction
+kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+mog_bs = cv2.createBackgroundSubtractorMOG2()
+knn_bs = cv2.createBackgroundSubtractorKNN()
+
 
 class QtCapture(QtGui.QFrame, main_ui):
     def __init__(self, fps, filename):
@@ -28,7 +35,7 @@ class QtCapture(QtGui.QFrame, main_ui):
         # Start Capture Video
         self.cap = cv2.VideoCapture(filename)
 
-        # Initiation to motion blur
+        # Initiation to moving average
         _, frame = self.cap.read()
         frame = proc.convBGR2RGB(frame)
         frame = cv2.resize(frame, (width, height))
@@ -57,7 +64,7 @@ class QtCapture(QtGui.QFrame, main_ui):
         super(QtGui.QFrame, self).deleteLater()
 
     def nextFrame(self):
-        global mask_status, mask_frame, frame
+        global mask_status, mask_frame, frame, mog_bs, kernel
         real_time = time.time()
         ret, frame_ori = self.cap.read()
         frame += 1
@@ -69,11 +76,12 @@ class QtCapture(QtGui.QFrame, main_ui):
         # ----------------------------------------------------- #
 
         # Initiation background subtraction
-        # Motion blur object subtraction
+        # ------------------------------------------------------#
+
+        # Moving Average subtraction
         acuWeight = cv2.accumulateWeighted(rgb_frame, avg, 0.01)
         initSubtrack = cv2.convertScaleAbs(acuWeight)               # return rgb color for background subtraction
         initBackground = proc.initBackgrounSubtraction(real_time, start_time, alpha)
-
         if not mask_status:
             if not initBackground:
                 print "initiation background subtraction"
@@ -86,6 +94,17 @@ class QtCapture(QtGui.QFrame, main_ui):
             print "mask frame"
             subtract_frame = mask_frame
 
+        # Mixture of Gaussian subtraction
+        mog_frame = mog_bs.apply(frame_ori)
+
+        # Kernel Nearest Neighbour subtraction
+        kkn_frame = knn_bs.apply(frame_ori)
+
+        # Mask
+        bs_mask = cv2.morphologyEx(mog_frame, cv2.MORPH_OPEN, proc.kernel())
+
+        # ------------------------------------------------------#
+
         # Image processing
         gray_frame = proc.convRGB2GRAY(initSubtrack)
 
@@ -93,7 +112,7 @@ class QtCapture(QtGui.QFrame, main_ui):
         proc.addText(gray_frame, "frame: {0}".format(frame), 1, 850, 525)
 
         # Last variable to show must 'show_frame'
-        show_frame = gray_frame
+        show_frame = bs_mask
 
         # ---------- Do not disturb this source code ----------- #
         # Gray scale, binary image - Format_Indexed8

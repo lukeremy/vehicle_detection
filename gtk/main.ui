@@ -339,7 +339,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>Elevated from street</string>
+         <string>Angle camera to street</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="lineEdit_elevatedCam">

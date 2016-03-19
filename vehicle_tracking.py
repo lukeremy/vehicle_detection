@@ -1,5 +1,5 @@
 import cv2
-
+import numpy as np
 
 def resize(frame, width, height):
     frame = cv2.resize(frame, (width, height))
@@ -28,3 +28,20 @@ def initBackgrounSubtraction(real_time, start_time, alpha):
     else:
         # print "background subtraction found"
         return True
+
+def morfOpening(bin_frame, kernel, iteration):
+    bin_frame = cv2.erode(bin_frame, kernel, iteration)
+    bin_frame = cv2.dilate(bin_frame, kernel, iteration)
+    return bin_frame
+
+def morfClosing(bin_frame, kernel, iteration):
+    bin_frame = cv2.dilate(bin_frame, kernel, iteration)
+    bin_frame = cv2.erode(bin_frame, kernel, iteration)
+    return bin_frame
+
+def kernel():
+    kernel = np.array([
+        [0, 0, 0],
+        [1, 1, 1],
+        [0, 0, 0]], dtype=np.uint8)
+    return kernel
