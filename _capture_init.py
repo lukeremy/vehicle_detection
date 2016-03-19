@@ -8,12 +8,14 @@ from PyQt4 import uic
 
 # Global variable
 main_ui = uic.loadUiType("gtk/video_frame.ui")[0]
+
 start_time = None
 width = 960     # pixel
 height = 540    # pixel
 alpha = 8       # second
 mask_status = False
 mask_frame = None
+frame = 0
 
 class QtCapture(QtGui.QFrame, main_ui):
     def __init__(self, fps, filename):
@@ -29,6 +31,7 @@ class QtCapture(QtGui.QFrame, main_ui):
         # Initiation to motion blur
         _, frame = self.cap.read()
         frame = proc.convBGR2RGB(frame)
+        frame = cv2.resize(frame, (width, height))
         avg = np.float32(frame)
 
     def setFPS(self, fps):
@@ -47,17 +50,22 @@ class QtCapture(QtGui.QFrame, main_ui):
         self.timer.stop()
 
     def deleteLater(self):
+        global frame
+        frame = 0
+
         self.cap.release()
         super(QtGui.QFrame, self).deleteLater()
 
     def nextFrame(self):
-        global mask_status, mask_frame
+        global mask_status, mask_frame, frame
         real_time = time.time()
         ret, frame_ori = self.cap.read()
+        frame += 1
 
         # ---------- Do not disturb this source code ---------- #
         # Default color model is BGR format
-        rgb_frame = proc.convBGR2RGB(frame_ori)                 # convert from BGR color model to RGB color model
+        frame_resize = cv2.resize(frame_ori, (width, height))
+        rgb_frame = proc.convBGR2RGB(frame_resize)                 # convert from BGR color model to RGB color model
         # ----------------------------------------------------- #
 
         # Initiation background subtraction
@@ -81,9 +89,11 @@ class QtCapture(QtGui.QFrame, main_ui):
         # Image processing
         gray_frame = proc.convRGB2GRAY(initSubtrack)
 
+        # Add frame rate text
+        proc.addText(gray_frame, "frame: {0}".format(frame), 1, 850, 525)
+
         # Last variable to show must 'show_frame'
         show_frame = gray_frame
-        show_frame = cv2.resize(show_frame, (width, height))    # resize frame
 
         # ---------- Do not disturb this source code ----------- #
         # Gray scale, binary image - Format_Indexed8

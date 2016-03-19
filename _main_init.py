@@ -107,7 +107,7 @@ class MainInit(QMainWindow, main_ui):
         # self.tableView_Capture()
         self.label_countShortVehicle.setText("140")
         self.label_countLongVehicle.setText("130")
-        self.label_videoFps.setText("fps : {0}/second".format("20"))
+        self.label_videoFps.setText("frame : {0}".format("0"))
 
         # 3.    Log
         # 3.1   Search
