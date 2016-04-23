@@ -6,13 +6,11 @@ import time
 from PyQt4 import QtGui, QtCore
 from PyQt4 import uic
 from cv2 import ocl
-ocl.setUseOpenCL(False)
-# set flag OCL to False if you build OPENCV -D WITH_OPENCL=ON
+ocl.setUseOpenCL(False)         # set flag OCL to False if you build OPENCV -D WITH_OPENCL=ON
 
 
 # Global variable
 video_frame = uic.loadUiType("gtk/video_frame.ui")[0]
-
 # init variable
 start_time = None
 width = 960     # pixel
@@ -21,10 +19,7 @@ alpha = 20      # second /fps (fps 30) -> 24/30 = 0.8 -> 8 second
 mask_status = False
 mask_frame = None
 frame = 0
-
-# background subtraction
-# kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-initMog = cv2.createBackgroundSubtractorMOG2()
+initMog = cv2.createBackgroundSubtractorMOG2()      # Mixture of Gaussian initialization
 
 class QtCapture(QtGui.QFrame, video_frame):
     def __init__(self, fps, filename):
@@ -82,19 +77,19 @@ class QtCapture(QtGui.QFrame, video_frame):
 
         # Initiation background subtraction
         # ------------------------------------------------------#
-
         # Moving Average subtraction
         acuWeight = cv2.accumulateWeighted(rgb_frame, avg, 0.01)
-        initSubtrack = cv2.convertScaleAbs(acuWeight)               # return rgb color for background subtraction
+        convScaleAbs = cv2.convertScaleAbs(acuWeight)               # return rgb color for background subtraction
+        movingAverage = convScaleAbs
         initBackground = proc.initBackgrounSubtraction(real_time, start_time, alpha)
         if not mask_status:
             if not initBackground:
                 print "initiation background subtraction"
             else:
                 print "mask found"
-                mask_frame = initSubtrack
+                mask_frame = convScaleAbs
                 mask_status = True
-            subtract_frame = initSubtrack
+            subtract_frame = convScaleAbs
             cv2.imwrite("samples/foreground.jpg", frame_ori)
         else:
             print "mask frame"
@@ -105,8 +100,8 @@ class QtCapture(QtGui.QFrame, video_frame):
 
         # Mask
         #bs_mask = cv2.morphologyEx(mog_frame, cv2.MORPH_OPEN, proc.kernel())
-
         # ------------------------------------------------------#
+
         # Image processing
         #gray_frame = proc.convRGB2GRAY(subtract_frame)
 
@@ -114,19 +109,18 @@ class QtCapture(QtGui.QFrame, video_frame):
         #proc.addText(gray_frame, "frame: {0}".format(frame), 1, 850, 525)
 
         # Last variable to show must 'show_frame'
-        show_frame = initSubtrack
-
-        colorSpace = True
-        # True for RGB, HSV, LAB, and other 3 channel color space
-        # False for Grayscale and binary
+        show_frame = movingAverage
 
         # ---------- Do not disturb this source code ----------- #
-        # Gray scale, binary image - Format_Indexed8
-        # RGB image - Format_RGB888
-        if colorSpace:
+        threeChannels = True
+        # True : RGB, HSV, LAB, and other 3 channel color space
+        # False : Grayscale and binary color space
+        if threeChannels:
             img = QtGui.QImage(show_frame, show_frame.shape[1], show_frame.shape[0], QtGui.QImage.Format_RGB888)
+            # RGB image - Format_RGB888
         else:
             img = QtGui.QImage(show_frame, show_frame.shape[1], show_frame.shape[0], QtGui.QImage.Format_Indexed8)
+            # Gray scale, binary image - Format_Indexed8
         pix = QtGui.QPixmap.fromImage(img)
         self.video_frame.setPixmap(pix)
         # ------------------------------------------------------ #
