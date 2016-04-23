@@ -5,26 +5,28 @@ import time
 
 from PyQt4 import QtGui, QtCore
 from PyQt4 import uic
+from cv2 import ocl
+ocl.setUseOpenCL(False)
+# set flag OCL to False if you build OPENCV -D WITH_OPENCL=ON
+
 
 # Global variable
-main_ui = uic.loadUiType("gtk/video_frame.ui")[0]
+video_frame = uic.loadUiType("gtk/video_frame.ui")[0]
 
 # init variable
 start_time = None
 width = 960     # pixel
 height = 540    # pixel
-alpha = 8       # second
+alpha = 20      # second /fps (fps 30) -> 24/30 = 0.8 -> 8 second
 mask_status = False
 mask_frame = None
 frame = 0
 
 # background subtraction
-kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-mog_bs = cv2.createBackgroundSubtractorMOG2()
-knn_bs = cv2.createBackgroundSubtractorKNN()
+# kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+initMog = cv2.createBackgroundSubtractorMOG2()
 
-
-class QtCapture(QtGui.QFrame, main_ui):
+class QtCapture(QtGui.QFrame, video_frame):
     def __init__(self, fps, filename):
         global avg
         super(QtGui.QFrame, self).__init__()
@@ -43,6 +45,9 @@ class QtCapture(QtGui.QFrame, main_ui):
 
     def setFPS(self, fps):
         self.fps = fps
+
+    def initSetting(self):
+        print "load Setting"
 
     def start(self):
         global start_time
@@ -64,7 +69,7 @@ class QtCapture(QtGui.QFrame, main_ui):
         super(QtGui.QFrame, self).deleteLater()
 
     def nextFrame(self):
-        global mask_status, mask_frame, frame, mog_bs, kernel
+        global mask_status, mask_frame, frame
         real_time = time.time()
         ret, frame_ori = self.cap.read()
         frame += 1
@@ -72,7 +77,7 @@ class QtCapture(QtGui.QFrame, main_ui):
         # ---------- Do not disturb this source code ---------- #
         # Default color model is BGR format
         frame_resize = cv2.resize(frame_ori, (width, height))
-        rgb_frame = proc.convBGR2RGB(frame_resize)                 # convert from BGR color model to RGB color model
+        rgb_frame = proc.convBGR2RGB(frame_resize)
         # ----------------------------------------------------- #
 
         # Initiation background subtraction
@@ -90,34 +95,38 @@ class QtCapture(QtGui.QFrame, main_ui):
                 mask_frame = initSubtrack
                 mask_status = True
             subtract_frame = initSubtrack
+            cv2.imwrite("samples/foreground.jpg", frame_ori)
         else:
             print "mask frame"
             subtract_frame = mask_frame
 
         # Mixture of Gaussian subtraction
-        mog_frame = mog_bs.apply(frame_ori)
-
-        # Kernel Nearest Neighbour subtraction
-        kkn_frame = knn_bs.apply(frame_ori)
+        mog_frame = initMog.apply(rgb_frame)
 
         # Mask
-        bs_mask = cv2.morphologyEx(mog_frame, cv2.MORPH_OPEN, proc.kernel())
+        #bs_mask = cv2.morphologyEx(mog_frame, cv2.MORPH_OPEN, proc.kernel())
 
         # ------------------------------------------------------#
-
         # Image processing
-        gray_frame = proc.convRGB2GRAY(initSubtrack)
+        #gray_frame = proc.convRGB2GRAY(subtract_frame)
 
         # Add frame rate text
-        proc.addText(gray_frame, "frame: {0}".format(frame), 1, 850, 525)
+        #proc.addText(gray_frame, "frame: {0}".format(frame), 1, 850, 525)
 
         # Last variable to show must 'show_frame'
-        show_frame = bs_mask
+        show_frame = initSubtrack
+
+        colorSpace = True
+        # True for RGB, HSV, LAB, and other 3 channel color space
+        # False for Grayscale and binary
 
         # ---------- Do not disturb this source code ----------- #
         # Gray scale, binary image - Format_Indexed8
         # RGB image - Format_RGB888
-        img = QtGui.QImage(show_frame, show_frame.shape[1], show_frame.shape[0], QtGui.QImage.Format_Indexed8)
+        if colorSpace:
+            img = QtGui.QImage(show_frame, show_frame.shape[1], show_frame.shape[0], QtGui.QImage.Format_RGB888)
+        else:
+            img = QtGui.QImage(show_frame, show_frame.shape[1], show_frame.shape[0], QtGui.QImage.Format_Indexed8)
         pix = QtGui.QPixmap.fromImage(img)
         self.video_frame.setPixmap(pix)
         # ------------------------------------------------------ #

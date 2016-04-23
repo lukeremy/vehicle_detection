@@ -1,6 +1,7 @@
 import time
 import sys
 import _capture_init as cap_init
+import _capture_alt_ as cap_alt
 
 from PyQt4 import uic
 from PyQt4.QtCore import *
@@ -59,38 +60,43 @@ class MainInit(QMainWindow, main_ui):
 
         # 1.2.  VideoMode
         self.radioButton_rgbVM.setChecked(True)
-        self.radioButton_gsVM.setChecked(False)
-        self.radioButton_hsvVM.setChecked(False)
-        self.radioButton_labVM.setChecked(False)
-        self.radioButton_edVM.setChecked(False)
+        self.radioButton_binVM.setChecked(False)
         self.checkBox_showboundaryVM.setChecked(False)
         self.checkBox_showroiVM.setChecked(False)
 
         # 1.3 Background Subtraction
         self.radioButton_BsMOG.setChecked(True)
-        self.radioButton_BsKNN.setChecked(False)
         self.radioButton_BsMA.setChecked(False)
-        self.radioButton_BsCB.setChecked(False)
-
-        self.label_initBackground.setEnabled(False)
-        self.lineEdit_initBackground.setEnabled(False)
-        self.label_initBackgroundSecond.setEnabled(False)
-
-        self.lineEdit_initBackground.setText("8")
-        self.radioButton_BsMA.toggled.connect(self.radioMBO)
 
         # 1.4   Data Input
         # 1.4.1 Camera
         self.lineEdit_altitudeCam.setText(format("100"))
-        self.lineEdit_elevatedCam.setText(format("30"))
-        self.lineEdit_fps.setText(format("20"))
+        self.lineEdit_elevatedCam.setText(format("20"))
+        self.lineEdit_fps.setText(format("10"))
+        self.lineEdit_focal.setText(format("5"))
 
-        # 1.4.2 SpeedDetection
-        self.radioButton_EuclideanModel.setChecked(True)
-        self.radioButton_PinHoleModel.setChecked(False)
+        # 1.4.2 Vehicle Input
+        # 1.4.2.1 Light Vehicle
+        self.lineEdit_pLV.setText(format("6"))
+        self.lineEdit_lLV.setText(format("2.1"))
+        self.lineEdit_tLV.setText(format("1.6"))
 
-        # 1.4.3 Thresholds
-        # self.lineEdit_initBackground.setText(format("20"))
+        # 1.4.2.1 Heavy Vehicle
+        self.lineEdit_pHV.setText(format("18"))
+        self.lineEdit_lHV.setText(format("2.5"))
+        self.lineEdit_tHV.setText(format("4.2"))
+
+        # 1.4.3 Registration and Detection Line
+        # 1.4.3.1 Registration Line
+        self.lineEdit_detectX1.setText(format("10"))
+        self.lineEdit_detectY1.setText(format("20"))
+        self.lineEdit_detectX2.setText(format("30"))
+        self.lineEdit_detectY2.setText(format("40"))
+        # 1.4.3.2 Detection Line
+        self.lineEdit_registX1.setText(format("50"))
+        self.lineEdit_registY1.setText(format("60"))
+        self.lineEdit_registX2.setText(format("70"))
+        self.lineEdit_registY2.setText(format("80"))
 
         # 1.5 Button Help and Set
         self.pushButton_helpSetting.clicked.connect(self.helpSetting)
@@ -99,6 +105,7 @@ class MainInit(QMainWindow, main_ui):
         # 2.    Video
         # 2.1   Video Player
         self.pushButton_startVideo.clicked.connect(self.startVideo)
+        # self.pushButton_startVideo.clicked.connect(self.startVideoAlt)
         # self.pushButton_stopVideo.clicked.connect(self.stopVideo)
         self.pushButton_showLog.setVisible(False)
         self.pushButton_showLog.clicked.connect(self.showLog)
@@ -191,14 +198,8 @@ class MainInit(QMainWindow, main_ui):
         # Get video mode
         if self.radioButton_rgbVM.isChecked():
             video_mode = "rgb"
-        elif self.radioButton_gsVM.isChecked():
-            video_mode = "gs"
-        elif self.radioButton_hsvVM.isChecked():
-            video_mode = "hsv"
-        elif self.radioButton_labVM.isChecked():
-            video_mode = "lab"
-        elif self.radioButton_edVM.isChecked():
-            video_mode = "edg"
+        elif self.radioButton_binVM.isChecked():
+            video_mode = "binary"
 
         # Get video mode
         boundary = self.checkBox_showboundaryVM.isChecked()
@@ -207,36 +208,51 @@ class MainInit(QMainWindow, main_ui):
         # Get background subtraction
         if self.radioButton_BsMOG.isChecked():
             background_subtraction = "mog"
-        elif self.radioButton_BsKNN.isChecked():
-            background_subtraction = "knn"
         elif self.radioButton_BsMA.isChecked():
             background_subtraction = "ma"
-            initMBO = self.lineEdit_initBackground.text()
-        elif self.radioButton_BsCB.isChecked():
-            background_subtraction = "cb"
 
         # Get camera setting
         alt = self.lineEdit_altitudeCam.text()
         elevated = self.lineEdit_elevatedCam.text()
         fps = self.lineEdit_fps.text()
+        focal = self.lineEdit_focal.text()
 
-        # Get speed detection method
-        if self.radioButton_EuclideanModel.isChecked():
-            speed_method = "euclidean"
-        elif self.radioButton_PinHoleModel.isChecked():
-            speed_method = "pinhole"
+        # Get vehicle dimension
+        # Light vehicle dimension
+        length_LV = self.lineEdit_pLV.text()
+        width_LV = self.lineEdit_lLV.text()
+        high_LV = self.lineEdit_tLV.text()
 
-        # Threshold
+        # Heavy vehicle dimension
+        length_HV = self.lineEdit_pHV.text()
+        width_HV = self.lineEdit_lHV.text()
+        high_HV = self.lineEdit_tHV.text()
+
+        # Registration and detection line
+        detectX1 = self.lineEdit_detectX1.text()
+        detectY1 = self.lineEdit_detectY1.text()
+        detectX2 = self.lineEdit_detectX2.text()
+        detectY2 = self.lineEdit_detectY2.text()
+
+        registX1 = self.lineEdit_registX1.text()
+        registY1 = self.lineEdit_registY1.text()
+        registX2 = self.lineEdit_registX2.text()
+        registY2 = self.lineEdit_registY2.text()
 
         print "Camera Input"
         print "video input: {0}".format(fileLoc)
         print "video mode: {0}".format(video_mode)
         print "background subtraction: {0}".format(background_subtraction)
-        print "init time bsMBO: {0}".format(initMBO)
+        # print "init time bsMBO: {0}".format(initMBO)
         print "boundary: {0}".format(boundary)
         print "roi: {0}".format(roi)
-        print "speed detection: {0}".format(speed_method)
-        print "alt: {0} | elevated: {1} | fps: {2}".format(alt, elevated, fps)
+        print "alt: {0} | elevated: {1} | fps: {2} | focal:{3}".format(alt, elevated, fps, focal)
+        print "Vehicle Input"
+        print "LV >> length: {0} | width: {1} | high: {2}".format(length_LV, width_LV, high_LV)
+        print "HV >> length: {0} | width: {1} | high: {2}".format(length_HV, width_HV, high_HV)
+        print "Registration and Detection Line"
+        print "Detection Line >> ({0},{1}) | ({2},{3})".format(detectX1, detectY1, detectX2, detectY2)
+        print "Registration Line >> ({0},{1}) | ({2},{3})".format(registX1, registY1, registX2, registY2)
         time.sleep(1)
 
         self.tabWidget.setTabEnabled(1, True)
@@ -264,6 +280,12 @@ class MainInit(QMainWindow, main_ui):
             self.capture.setParent(self.video_frame)
 
         self.capture.start()
+        self.capture.show()
+
+    def startVideoAlt(self):
+        if not self.capture:
+            self.capture = cap_alt.QtCaptureAlt(fileLoc)
+        self.capture.startCapture()
         self.capture.show()
 
     def pauseVideo(self):

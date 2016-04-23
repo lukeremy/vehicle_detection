@@ -32,7 +32,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Vehicle Counting</string>
+   <string>Vehicle Clasification</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTabWidget" name="tabWidget">
@@ -153,7 +153,7 @@
         <x>20</x>
         <y>130</y>
         <width>411</width>
-        <height>191</height>
+        <height>111</height>
        </rect>
       </property>
       <property name="title">
@@ -172,7 +172,7 @@
         <string>Show boundary</string>
        </property>
       </widget>
-      <widget class="QRadioButton" name="radioButton_gsVM">
+      <widget class="QRadioButton" name="radioButton_binVM">
        <property name="geometry">
         <rect>
          <x>20</x>
@@ -182,33 +182,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Grayscale</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="radioButton_hsvVM">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>90</y>
-         <width>131</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>HSV</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="radioButton_edVM">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>150</y>
-         <width>121</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Edge Detection</string>
+        <string>Binary Image</string>
        </property>
       </widget>
       <widget class="QRadioButton" name="radioButton_rgbVM">
@@ -237,19 +211,6 @@
         <string>Show region of interest (ROI)</string>
        </property>
       </widget>
-      <widget class="QRadioButton" name="radioButton_labVM">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>120</y>
-         <width>131</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>LAB</string>
-       </property>
-      </widget>
      </widget>
      <widget class="QGroupBox" name="groupBox_4DataInput">
       <property name="geometry">
@@ -269,7 +230,7 @@
          <x>10</x>
          <y>30</y>
          <width>381</width>
-         <height>111</height>
+         <height>131</height>
         </rect>
        </property>
        <property name="font">
@@ -308,6 +269,9 @@
         </property>
         <property name="autoFillBackground">
          <bool>false</bool>
+        </property>
+        <property name="maxLength">
+         <number>3</number>
         </property>
         <property name="frame">
          <bool>true</bool>
@@ -356,6 +320,9 @@
         </property>
         <property name="autoFillBackground">
          <bool>false</bool>
+        </property>
+        <property name="maxLength">
+         <number>3</number>
         </property>
         <property name="frame">
          <bool>true</bool>
@@ -418,6 +385,9 @@
         <property name="autoFillBackground">
          <bool>false</bool>
         </property>
+        <property name="maxLength">
+         <number>3</number>
+        </property>
         <property name="frame">
          <bool>true</bool>
         </property>
@@ -425,20 +395,84 @@
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
+       <widget class="QLabel" name="label_focalLength">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>103</y>
+          <width>141</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Focal length </string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_focal">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>100</y>
+          <width>91</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="maxLength">
+         <number>3</number>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_fpersecond_2">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>103</y>
+          <width>41</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>mm</string>
+        </property>
+       </widget>
       </widget>
-      <widget class="QGroupBox" name="groupBox_dataInputSpeedCam">
+      <widget class="QGroupBox" name="groupBox_dataInputVehicle">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>150</y>
+         <y>170</y>
          <width>381</width>
-         <height>201</height>
+         <height>101</height>
         </rect>
        </property>
        <property name="title">
-        <string>Speed Detection</string>
+        <string>Vehicle Dimension</string>
        </property>
-       <widget class="QRadioButton" name="radioButton_PinHoleModel">
+       <widget class="QLabel" name="label_inputLV">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>30</y>
+          <width>171</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Light Vehicle (LV)</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_inputHV">
         <property name="geometry">
          <rect>
           <x>20</x>
@@ -448,66 +482,53 @@
          </rect>
         </property>
         <property name="text">
-         <string>Pin Hole Model</string>
+         <string>Heavy Vehicle (HV)</string>
         </property>
        </widget>
-       <widget class="QRadioButton" name="radioButton_EuclideanModel">
+       <widget class="QLabel" name="label_panjangVehicle">
         <property name="geometry">
          <rect>
-          <x>20</x>
+          <x>172</x>
+          <y>10</y>
+          <width>16</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>P</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_lebarVehicle">
+        <property name="geometry">
+         <rect>
+          <x>212</x>
+          <y>10</y>
+          <width>16</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>L</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_tinggiVehicle">
+        <property name="geometry">
+         <rect>
+          <x>252</x>
+          <y>10</y>
+          <width>16</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>T</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_lLV">
+        <property name="geometry">
+         <rect>
+          <x>202</x>
           <y>30</y>
-          <width>161</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Euclidean Model</string>
-        </property>
-       </widget>
-       <widget class="QRadioButton" name="radioButton_RegistrationLine">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>90</y>
-          <width>231</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Detection and Registration Line </string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_detectionLine">
-        <property name="geometry">
-         <rect>
-          <x>46</x>
-          <y>130</y>
-          <width>101</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Detection Line</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_registrationLine">
-        <property name="geometry">
-         <rect>
-          <x>46</x>
-          <y>152</y>
-          <width>121</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Registration Line</string>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="lineEdit_detectX1">
-        <property name="geometry">
-         <rect>
-          <x>170</x>
-          <y>128</y>
           <width>31</width>
           <height>20</height>
          </rect>
@@ -517,6 +538,224 @@
         </property>
         <property name="autoFillBackground">
          <bool>false</bool>
+        </property>
+        <property name="maxLength">
+         <number>3</number>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_pLV">
+        <property name="geometry">
+         <rect>
+          <x>158</x>
+          <y>30</y>
+          <width>31</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="maxLength">
+         <number>3</number>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_tLV">
+        <property name="geometry">
+         <rect>
+          <x>242</x>
+          <y>30</y>
+          <width>31</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="maxLength">
+         <number>3</number>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_tHV">
+        <property name="geometry">
+         <rect>
+          <x>242</x>
+          <y>60</y>
+          <width>31</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="maxLength">
+         <number>3</number>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_pHV">
+        <property name="geometry">
+         <rect>
+          <x>158</x>
+          <y>60</y>
+          <width>31</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="maxLength">
+         <number>3</number>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_lHV">
+        <property name="geometry">
+         <rect>
+          <x>202</x>
+          <y>60</y>
+          <width>31</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="maxLength">
+         <number>3</number>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_lvMeter">
+        <property name="geometry">
+         <rect>
+          <x>282</x>
+          <y>30</y>
+          <width>46</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>meter</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_hvMeter">
+        <property name="geometry">
+         <rect>
+          <x>282</x>
+          <y>60</y>
+          <width>46</width>
+          <height>13</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>meter</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>280</y>
+         <width>381</width>
+         <height>121</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Detection and Registration Line</string>
+       </property>
+       <widget class="QLabel" name="label_detectionLine">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>50</y>
+          <width>101</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Detection Line</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_lineY2">
+        <property name="geometry">
+         <rect>
+          <x>287</x>
+          <y>30</y>
+          <width>21</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Y2</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_registY2">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>70</y>
+          <width>31</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="maxLength">
+         <number>3</number>
         </property>
         <property name="frame">
          <bool>true</bool>
@@ -528,8 +767,8 @@
        <widget class="QLineEdit" name="lineEdit_registX1">
         <property name="geometry">
          <rect>
-          <x>170</x>
-          <y>150</y>
+          <x>157</x>
+          <y>70</y>
           <width>31</width>
           <height>20</height>
          </rect>
@@ -539,6 +778,47 @@
         </property>
         <property name="autoFillBackground">
          <bool>false</bool>
+        </property>
+        <property name="maxLength">
+         <number>3</number>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_registrationLine">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>72</y>
+          <width>121</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Registration Line</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_detectY2">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>48</y>
+          <width>31</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="maxLength">
+         <number>3</number>
         </property>
         <property name="frame">
          <bool>true</bool>
@@ -550,8 +830,8 @@
        <widget class="QLineEdit" name="lineEdit_detectY1">
         <property name="geometry">
          <rect>
-          <x>204</x>
-          <y>128</y>
+          <x>191</x>
+          <y>48</y>
           <width>31</width>
           <height>20</height>
          </rect>
@@ -562,101 +842,8 @@
         <property name="autoFillBackground">
          <bool>false</bool>
         </property>
-        <property name="frame">
-         <bool>true</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="lineEdit_registY1">
-        <property name="geometry">
-         <rect>
-          <x>204</x>
-          <y>150</y>
-          <width>31</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="layoutDirection">
-         <enum>Qt::LeftToRight</enum>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="frame">
-         <bool>true</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_lineX1">
-        <property name="geometry">
-         <rect>
-          <x>178</x>
-          <y>110</y>
-          <width>21</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>X1</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_lineX2">
-        <property name="geometry">
-         <rect>
-          <x>211</x>
-          <y>110</y>
-          <width>21</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Y1</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_lineY2">
-        <property name="geometry">
-         <rect>
-          <x>300</x>
-          <y>110</y>
-          <width>21</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Y2</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_lineX2_2">
-        <property name="geometry">
-         <rect>
-          <x>268</x>
-          <y>110</y>
-          <width>21</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>X2</string>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="lineEdit_detectX2">
-        <property name="geometry">
-         <rect>
-          <x>260</x>
-          <y>128</y>
-          <width>31</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="layoutDirection">
-         <enum>Qt::LeftToRight</enum>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
+        <property name="maxLength">
+         <number>3</number>
         </property>
         <property name="frame">
          <bool>true</bool>
@@ -668,8 +855,8 @@
        <widget class="QLineEdit" name="lineEdit_registX2">
         <property name="geometry">
          <rect>
-          <x>260</x>
-          <y>150</y>
+          <x>247</x>
+          <y>70</y>
           <width>31</width>
           <height>20</height>
          </rect>
@@ -680,6 +867,9 @@
         <property name="autoFillBackground">
          <bool>false</bool>
         </property>
+        <property name="maxLength">
+         <number>3</number>
+        </property>
         <property name="frame">
          <bool>true</bool>
         </property>
@@ -687,33 +877,24 @@
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
-       <widget class="QLineEdit" name="lineEdit_detectY2">
+       <widget class="QLabel" name="label_lineX2">
         <property name="geometry">
          <rect>
-          <x>293</x>
-          <y>128</y>
-          <width>31</width>
-          <height>20</height>
+          <x>198</x>
+          <y>30</y>
+          <width>21</width>
+          <height>17</height>
          </rect>
         </property>
-        <property name="layoutDirection">
-         <enum>Qt::LeftToRight</enum>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="frame">
-         <bool>true</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <property name="text">
+         <string>Y1</string>
         </property>
        </widget>
-       <widget class="QLineEdit" name="lineEdit_registY2">
+       <widget class="QLineEdit" name="lineEdit_registY1">
         <property name="geometry">
          <rect>
-          <x>293</x>
-          <y>150</y>
+          <x>191</x>
+          <y>70</y>
           <width>31</width>
           <height>20</height>
          </rect>
@@ -724,6 +905,9 @@
         <property name="autoFillBackground">
          <bool>false</bool>
         </property>
+        <property name="maxLength">
+         <number>3</number>
+        </property>
         <property name="frame">
          <bool>true</bool>
         </property>
@@ -731,19 +915,82 @@
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
-      </widget>
-      <widget class="QGroupBox" name="groupBox_dataInputThreshold">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>370</y>
-         <width>391</width>
-         <height>101</height>
-        </rect>
-       </property>
-       <property name="title">
-        <string>Threshold</string>
-       </property>
+       <widget class="QLineEdit" name="lineEdit_detectX1">
+        <property name="geometry">
+         <rect>
+          <x>157</x>
+          <y>48</y>
+          <width>31</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="maxLength">
+         <number>3</number>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_lineX1">
+        <property name="geometry">
+         <rect>
+          <x>165</x>
+          <y>30</y>
+          <width>21</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>X1</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_detectX2">
+        <property name="geometry">
+         <rect>
+          <x>247</x>
+          <y>48</y>
+          <width>31</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="maxLength">
+         <number>3</number>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_lineX2_2">
+        <property name="geometry">
+         <rect>
+          <x>255</x>
+          <y>30</y>
+          <width>21</width>
+          <height>17</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>X2</string>
+        </property>
+       </widget>
       </widget>
      </widget>
      <widget class="QPushButton" name="pushButton_setSetting">
@@ -776,7 +1023,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>330</y>
+        <y>250</y>
         <width>391</width>
         <height>181</height>
        </rect>
@@ -797,7 +1044,7 @@
         <string>Mixture of Gaussian (MOG)</string>
        </property>
       </widget>
-      <widget class="QRadioButton" name="radioButton_BsKNN">
+      <widget class="QRadioButton" name="radioButton_BsMA">
        <property name="geometry">
         <rect>
          <x>20</x>
@@ -807,81 +1054,7 @@
         </rect>
        </property>
        <property name="text">
-        <string>Kernel Nearest Neighbors (KNN)</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="radioButton_BsMA">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>90</y>
-         <width>321</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="text">
         <string>Moving Average (MA)</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_initBackground">
-       <property name="geometry">
-        <rect>
-         <x>46</x>
-         <y>120</y>
-         <width>141</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Initiation background</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="lineEdit_initBackground">
-       <property name="geometry">
-        <rect>
-         <x>200</x>
-         <y>116</y>
-         <width>81</width>
-         <height>20</height>
-        </rect>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="autoFillBackground">
-        <bool>false</bool>
-       </property>
-       <property name="frame">
-        <bool>true</bool>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_initBackgroundSecond">
-       <property name="geometry">
-        <rect>
-         <x>300</x>
-         <y>120</y>
-         <width>46</width>
-         <height>13</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>second</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="radioButton_BsCB">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>140</y>
-         <width>331</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Code Book (CB)</string>
        </property>
       </widget>
      </widget>
@@ -1250,7 +1423,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>27</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAbout">
