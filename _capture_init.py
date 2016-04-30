@@ -15,7 +15,7 @@ video_frame = uic.loadUiType("gtk/video_frame.ui")[0]
 start_time = None
 width = 960     # pixel
 height = 540    # pixel
-alpha = 20      # second /fps (fps 30) -> 24/30 = 0.8 -> 8 second
+alpha = 3      # second /fps (fps 30) -> 24/30 = 0.8 -> 8 second
 mask_status = False
 mask_frame = None
 frame = 0
@@ -90,7 +90,7 @@ class QtCapture(QtGui.QFrame, video_frame):
                 mask_frame = convScaleAbs
                 mask_status = True
             subtract_frame = convScaleAbs
-            cv2.imwrite("samples/foreground.jpg", frame_ori)
+            #cv2.imwrite("samples/foreground.jpg", frame_ori)
         else:
             print "mask frame"
             subtract_frame = mask_frame
