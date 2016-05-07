@@ -79,3 +79,18 @@ def pinholeModel(W, f, H, theta, x1, x2):
     Lv = Lx1 - (Lx2 + X2G)
     print "delta1: {0} | delta2: {1} | Lx1: {2} | Lx2: {3} | X2G: {4} | Lv: {5}".format(delta1, delta2, Lx1, Lx2, X2G, Lv)
     return Lv
+
+def shadowRemoval():
+    x = 5
+
+def contourDetection():
+    print "contour"
+
+def blobDetector():
+    print "blob"
+
+def backgroundSubtractionAverage():
+    print "bs"
+
+def backgroundSubtractionMoG():
+    print "mog"

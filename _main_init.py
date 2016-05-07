@@ -70,29 +70,28 @@ class MainInit(QMainWindow, main_ui):
 
         # 1.4   Data Input
         # 1.4.1 Camera
-        self.lineEdit_altitudeCam.setText(format("100"))
-        self.lineEdit_elevatedCam.setText(format("20"))
-        self.lineEdit_fps.setText(format("10"))
-        self.lineEdit_focal.setText(format("5"))
+        self.setAlt(20)
+        self.setElevated(20)
+        self.setFps(30)
+        self.setFocal(15)
 
         # 1.4.2 Vehicle Input
         # 1.4.2.1 Light Vehicle
-        self.lineEdit_pLV.setText(format("6"))
-        self.lineEdit_lLV.setText(format("2.1"))
-        self.lineEdit_tLV.setText(format("1.6"))
-
+        self.setLenghtLV(6)
+        self.setWidthLV(2.1)
+        self.setHighLV(1.6)
         # 1.4.2.1 Heavy Vehicle
-        self.lineEdit_pHV.setText(format("18"))
-        self.lineEdit_lHV.setText(format("2.5"))
-        self.lineEdit_tHV.setText(format("4.2"))
+        self.setLengthHV(18)
+        self.setWidthHV(2.5)
+        self.setHighHV(4.2)
 
         # 1.4.3 Registration and Detection Line
-        # 1.4.3.1 Registration Line
+        # 1.4.3.1 Detection Line
         self.lineEdit_detectX1.setText(format("10"))
         self.lineEdit_detectY1.setText(format("20"))
         self.lineEdit_detectX2.setText(format("30"))
         self.lineEdit_detectY2.setText(format("40"))
-        # 1.4.3.2 Detection Line
+        # 1.4.3.2 Registration Line
         self.lineEdit_registX1.setText(format("50"))
         self.lineEdit_registY1.setText(format("60"))
         self.lineEdit_registX2.setText(format("70"))
@@ -130,7 +129,50 @@ class MainInit(QMainWindow, main_ui):
         self.label_logcountShortVehicle.setText("20")
         self.label_logcountLongVehicle.setText("100")
 
-    # Get variabel
+    # Set Variable
+    def setAlt(self, value):
+        self.lineEdit_altitudeCam.setText(format(value))
+
+    def setElevated(self, value):
+        self.lineEdit_elevatedCam.setText(format(value))
+
+    def setFps(self, value):
+        self.lineEdit_fps.setText(format(value))
+
+    def setFocal(self, value):
+        self.lineEdit_focal.setText(format(value))
+
+    def setLenghtLV(self, value):
+        self.lineEdit_pLV.setText(format(value))
+
+    def setWidthLV(self, value):
+        self.lineEdit_lLV.setText(format(value))
+
+    def setHighLV(self, value):
+        self.lineEdit_tLV.setText(format(value))
+
+    def setLengthHV(self, value):
+        self.lineEdit_pHV.setText(format(value))
+
+    def setWidthHV(self, value):
+        self.lineEdit_lHV.setText(format(value))
+
+    def setHighHV(self, value):
+        self.lineEdit_tHV.setText(format(value))
+
+    def setDetectionLine(self, x1, y1, x2, y2):
+        self.lineEdit_detectX1.setText(format(x1))
+        self.lineEdit_detectY1.setText(format(y1))
+        self.lineEdit_detectX2.setText(format(x2))
+        self.lineEdit_detectY2.setText(format(y2))
+
+    def setRegistrationLine(self, x1, y1, x2, y2):
+        self.lineEdit_registX1.setText(format(x1))
+        self.lineEdit_registY1.setText(format(y1))
+        self.lineEdit_registX2.setText(format(x2))
+        self.lineEdit_registY2.setText(format(y2))
+
+    # Get Variable
     def getAlt(self):
         return self.lineEdit_altitudeCam.text()
 
@@ -165,7 +207,7 @@ class MainInit(QMainWindow, main_ui):
         if self.radioButton_rgbVM.isChecked():
             video_mode = "rgb"
         elif self.radioButton_binVM.isChecked():
-            video_mode = "binary"
+            video_mode = "bin"
         return video_mode
 
     def getBoundary(self):
@@ -260,30 +302,27 @@ class MainInit(QMainWindow, main_ui):
 
         # Get video mode
         video_mode = self.getVideoMode()
-
-        # Get video mode
         boundary = self.getBoundary()
         roi = self.getRoi()
 
         # Get background subtraction
         background_subtraction = self.getBackgroundSubtraction()
 
-        # Get camera setting
-        alt = self.getAlt()
-        elevated = self.getElevated()
-        fps = self.getFps()
-        focal = self.getFocal()
+        # Camera
+        alt = float(self.getAlt())
+        elevated = float(self.getElevated())
+        fps = float(self.getFps())
+        focal = float(self.getFocal())
 
-        # Get vehicle dimension
         # Light vehicle dimension
-        length_LV = self.getLengthLV()
-        width_LV = self.getWidthLV()
-        high_LV = self.getHighLV()
+        length_LV = float(self.getLengthLV())
+        width_LV = float(self.getWidthLV())
+        high_LV = float(self.getHighLV())
 
         # Heavy vehicle dimension
-        length_HV = self.getLengthHV()
-        width_HV = self.getWidthHV()
-        high_HV = self.getHighHV()
+        length_HV = float(self.getLengthHV())
+        width_HV = float(self.getWidthHV())
+        high_HV = float(self.getHighHV())
 
         # Registration and detection line
         detectX1, detectY1, detectX2, detectY2 = self.getDetectLine()
@@ -318,15 +357,62 @@ class MainInit(QMainWindow, main_ui):
 
     # Function Tab 2. Video
     def startVideo(self):
-        fps = 30
+
+        # Get video mode
+        video_mode = self.getVideoMode()
+        boundary = self.getBoundary()
+        roi = self.getRoi()
+
+        # Get background subtraction
+        background_subtraction = self.getBackgroundSubtraction()
+
+        # Camera
+        alt = float(self.getAlt())
+        elevated = int(self.getElevated())
+        fps = float(self.getFps())
+        focal = float(self.getFocal())
+
+        # Light vehicle dimension
+        length_LV = float(self.getLengthLV())
+        width_LV = float(self.getWidthLV())
+        high_LV = float(self.getHighLV())
+
+        # Heavy vehicle dimension
+        length_HV = float(self.getLengthHV())
+        width_HV = float(self.getWidthHV())
+        high_HV = float(self.getHighHV())
+
+        # Registration and detection line
+        detectX1, detectY1, detectX2, detectY2 = self.getDetectLine()
+        registX1, registY1, registX2, registY2 = self.getRegistrationLine()
 
         self.tabWidget.setTabEnabled(0, False)
 
+        time.sleep(1)
+
+        self.tabWidget.setTabEnabled(1, True)
+        self.tabWidget.setCurrentIndex(1)
+
         if not self.capture:
-            self.capture = cap_init.QtCapture(fps, fileLoc)
+            self.capture = cap_init.QtCapture(fileLoc)
             self.pushButton_pauseVideo.clicked.connect(self.capture.stop)
             self.pushButton_stopVideo.clicked.connect(self.stopVideo)
-            # self.capture.setFPS(1)
+
+            self.capture.setVideoMode(video_mode)
+
+            self.capture.setFPS(fps)
+            self.capture.setAlt(alt)
+            self.capture.setElevated(elevated)
+            self.capture.setFocal(focal)
+
+            self.capture.setLengthLV(length_LV)
+            self.capture.setWidthLV(width_LV)
+            self.capture.setHighLV(high_LV)
+
+            self.capture.setLengthHV(length_HV)
+            self.capture.setWidthHV(width_HV)
+            self.capture.setHighHV(high_HV)
+
             self.capture.setParent(self.video_frame)
 
         self.capture.start()

@@ -1,13 +1,14 @@
 import cv2
 import numpy as np
 
-file_mask = "samples/mask.jpg"
-file_foreground = "samples/foreground.jpg"
+file_mask = "samples/background2.jpg"
+file_foreground = "samples/frameori2.jpg"
 file_mog = "samples/test_mog.jpg"
 
 img_back = cv2.imread(file_mask)
 img_fore = cv2.imread(file_foreground)
 img_mog = cv2.imread(file_mog)
+img_back = cv2.resize(img_back, (960,540))
 img_fore = cv2.resize(img_fore, (960,540))
 
 kernel = np.ones((5,5),np.float32)/25
@@ -16,7 +17,7 @@ gray_background = cv2.cvtColor(img_back, cv2.COLOR_RGB2GRAY)
 gray_foreground = cv2.cvtColor(img_fore, cv2.COLOR_RGB2GRAY)
 
 
-cv2.imwrite("samples/grayforeground.jpg", gray_foreground)
+#cv2.imwrite("samples/grayforeground.jpg", gray_foreground)
 
 #gray_foreground = cv2.blur(gray_foreground, (5,5))
 #gray_background = cv2.blur(gray_background,(5,5))
@@ -109,3 +110,4 @@ cv2.imshow("binary", im_floodfill)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+

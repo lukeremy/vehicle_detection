@@ -23,16 +23,13 @@ frame = 0
 initMog = cv2.createBackgroundSubtractorMOG2()      # Mixture of Gaussian initialization
 
 class QtCapture(QtGui.QFrame, video_frame):
-    def __init__(self, fps, filename):
+    def __init__(self, filename):
         global avg
         super(QtGui.QFrame, self).__init__()
 
-        self.fps = fps
         self.setupUi(self)
 
         # Start Capture Video
-        instance = mi.MainInit()
-        print instance.getAlt()
         self.cap = cv2.VideoCapture(filename)
 
         # Initiation to moving average
@@ -41,8 +38,38 @@ class QtCapture(QtGui.QFrame, video_frame):
         frame = cv2.resize(frame, (width, height))
         avg = np.float32(frame)
 
+    def setVideoMode(self, video_mode):
+        self.video_mode = video_mode
+
     def setFPS(self, fps):
         self.fps = fps
+
+    def setAlt(self, alt):
+        self.alt = alt
+
+    def setElevated(self, elevated):
+        self.elevated = elevated
+
+    def setFocal(self, focal):
+        self.focal = focal
+
+    def setLengthLV(self, lenghtLV):
+        self.lengthLV = lenghtLV
+
+    def setWidthLV(self, widthLV):
+        self.widthLV = widthLV
+
+    def setHighLV(self, highLV):
+        self.highLV = highLV
+
+    def setLengthHV(self, lenghtHV):
+        self.lengthHV = lenghtHV
+
+    def setWidthHV(self, widthHV):
+        self.widthHV = widthHV
+
+    def setHighHV(self, highHV):
+        self.highHV = highHV
 
     def initSetting(self):
         print "load Setting"
@@ -54,6 +81,12 @@ class QtCapture(QtGui.QFrame, video_frame):
         self.timer.start(1000. / self.fps)
         start_time = time.time()
         print format(start_time)
+
+        print format(self.alt)
+        print format(self.focal)
+        print format(self.elevated)
+        print format(self.fps)
+
         return start_time
 
     def stop(self):
@@ -71,6 +104,7 @@ class QtCapture(QtGui.QFrame, video_frame):
         real_time = time.time()
         ret, frame_ori = self.cap.read()
         frame += 1
+        instance = mi.MainInit()
 
         # ---------- Do not disturb this source code ---------- #
         # Default color model is BGR format
@@ -115,15 +149,14 @@ class QtCapture(QtGui.QFrame, video_frame):
         show_frame = rgb_frame
 
         # ---------- Do not disturb this source code ----------- #
-        threeChannels = True
-        # True : RGB, HSV, LAB, and other 3 channel color space
-        # False : Grayscale and binary color space
-        if threeChannels:
+        if self.video_mode == "rgb":
+            #print self.video_mode
             img = QtGui.QImage(show_frame, show_frame.shape[1], show_frame.shape[0], QtGui.QImage.Format_RGB888)
             # RGB image - Format_RGB888
         else:
             img = QtGui.QImage(show_frame, show_frame.shape[1], show_frame.shape[0], QtGui.QImage.Format_Indexed8)
             # Gray scale, binary image - Format_Indexed8
+
         pix = QtGui.QPixmap.fromImage(img)
         self.video_frame.setPixmap(pix)
         # ------------------------------------------------------ #
