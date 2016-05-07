@@ -48,7 +48,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <property name="elideMode">
      <enum>Qt::ElideNone</enum>
@@ -1112,7 +1112,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Short Vehicle</string>
+       <string>Light Vehicle</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_LongVehicle">
@@ -1125,7 +1125,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Long Vehicle</string>
+       <string>Heavy Vehicle</string>
       </property>
      </widget>
      <widget class="QLabel" name="video_frame">
@@ -1341,7 +1341,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Long Vehicle</string>
+       <string>Heavy Vehicle</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_logShortVehicle">
@@ -1354,7 +1354,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Short Vehicle</string>
+       <string>Light Vehicle</string>
       </property>
      </widget>
      <widget class="QTableWidget" name="tableWidget_searchLog">
@@ -1423,7 +1423,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>23</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAbout">

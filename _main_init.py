@@ -15,7 +15,6 @@ help_ui = uic.loadUiType("gtk/help.ui")[0]
 # Variable
 fileLoc = 0
 
-
 class MainInit(QMainWindow, main_ui):
     def __init__(self, parent=None):
         # Initialization main interface from QT to Python
@@ -109,9 +108,9 @@ class MainInit(QMainWindow, main_ui):
 
         # 2.2   Capture
         # self.tableView_Capture()
-        self.label_countShortVehicle.setText("140")
-        self.label_countLongVehicle.setText("130")
-        self.label_videoFps.setText("frame : {0}".format("0"))
+        self.setLabelLV("0")
+        self.setLabelHV("0")
+        self.setLabelFPS(0)
 
         # 3.    Log
         # 3.1   Search
@@ -126,8 +125,8 @@ class MainInit(QMainWindow, main_ui):
 
         # 3.2   View Log
         # self.tableView_searchLog()
-        self.label_logcountShortVehicle.setText("20")
-        self.label_logcountLongVehicle.setText("100")
+        self.label_logcountShortVehicle.setText("0")
+        self.label_logcountLongVehicle.setText("0")
 
     # Set Variable
     def setAlt(self, value):
@@ -171,6 +170,15 @@ class MainInit(QMainWindow, main_ui):
         self.lineEdit_registY1.setText(format(y1))
         self.lineEdit_registX2.setText(format(x2))
         self.lineEdit_registY2.setText(format(y2))
+
+    def setLabelFPS(self, value):
+        self.label_videoFps.setText("frame : {0}".format(value))
+
+    def setLabelLV(self, value):
+        self.label_countShortVehicle.setText(value)
+
+    def setLabelHV(self, value):
+        self.label_countLongVehicle.setText(value)
 
     # Get Variable
     def getAlt(self):
@@ -461,11 +469,8 @@ class MainInit(QMainWindow, main_ui):
         print "mulai dari tanggal {0}".format(fromDate)
         print "hingga tanggal {0}".format(untilDate)
 
-        self.lcdNumber_logShortVehicle.display("50")
-        self.lcdNumber_logLongVehicle.display("10")
+        self.label_logcountShortVehicle.setText("20")
+        self.label_logcountLongVehicle.setText("100")
 
     def clearLog(self):
         self.tableWidget_searchLog.clear()
-
-    def ujicoba(self):
-        print "Open new popup"

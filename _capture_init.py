@@ -80,12 +80,16 @@ class QtCapture(QtGui.QFrame, video_frame):
         self.timer.timeout.connect(self.nextFrame)
         self.timer.start(1000. / self.fps)
         start_time = time.time()
-        print format(start_time)
 
-        print format(self.alt)
-        print format(self.focal)
-        print format(self.elevated)
-        print format(self.fps)
+        instance = mi.MainInit()
+        instance.setAlt("876")
+
+
+        #print format(start_time)
+        #print format(self.alt)
+        #print format(self.focal)
+        #print format(self.elevated)
+        #print format(self.fps)
 
         return start_time
 
@@ -104,7 +108,6 @@ class QtCapture(QtGui.QFrame, video_frame):
         real_time = time.time()
         ret, frame_ori = self.cap.read()
         frame += 1
-        instance = mi.MainInit()
 
         # ---------- Do not disturb this source code ---------- #
         # Default color model is BGR format
