@@ -81,10 +81,6 @@ class QtCapture(QtGui.QFrame, video_frame):
         self.timer.start(1000. / self.fps)
         start_time = time.time()
 
-        instance = mi.MainInit()
-        instance.setAlt("876")
-
-
         #print format(start_time)
         #print format(self.alt)
         #print format(self.focal)

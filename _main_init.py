@@ -25,14 +25,6 @@ class MainInit(QMainWindow, main_ui):
         self.capture = None
 
         port_cam = ["0", "1", "2"]
-        filename = None
-        video_mode = None
-        boundary = None
-        roi = None
-        alt = None
-        elevated = None
-        fps = None
-
         # Menu Bar
         # File
         self.actionExit.triggered.connect(self.file_exit)
@@ -110,7 +102,7 @@ class MainInit(QMainWindow, main_ui):
         # self.tableView_Capture()
         self.setLabelLV("0")
         self.setLabelHV("0")
-        self.setLabelFPS(0)
+        self.setLabelFPS("0")
 
         # 3.    Log
         # 3.1   Search
