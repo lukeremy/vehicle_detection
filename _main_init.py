@@ -105,8 +105,6 @@ class MainInit(QMainWindow, main_ui):
         # 2.    Video
         # 2.1   Video Player
         self.pushButton_startVideo.clicked.connect(self.startVideo)
-        # self.pushButton_startVideo.clicked.connect(self.startVideoAlt)
-        # self.pushButton_stopVideo.clicked.connect(self.stopVideo)
         self.pushButton_showLog.setVisible(False)
         self.pushButton_showLog.clicked.connect(self.showLog)
 
@@ -131,6 +129,71 @@ class MainInit(QMainWindow, main_ui):
         # self.tableView_searchLog()
         self.label_logcountShortVehicle.setText("20")
         self.label_logcountLongVehicle.setText("100")
+
+    # Get variabel
+    def getAlt(self):
+        return self.lineEdit_altitudeCam.text()
+
+    def getElevated(self):
+        return self.lineEdit_elevatedCam.text()
+
+    def getFps(self):
+        return self.lineEdit_fps.text()
+
+    def getFocal(self):
+        return self.lineEdit_focal.text()
+
+    def getLengthLV(self):
+        return self.lineEdit_pLV.text()
+
+    def getWidthLV(self):
+        return self.lineEdit_lLV.text()
+
+    def getHighLV(self):
+        return self.lineEdit_tLV.text()
+
+    def getLengthHV(self):
+        return self.lineEdit_pHV.text()
+
+    def getWidthHV(self):
+        return self.lineEdit_lHV.text()
+
+    def getHighHV(self):
+        return self.lineEdit_tHV.text()
+
+    def getVideoMode(self):
+        if self.radioButton_rgbVM.isChecked():
+            video_mode = "rgb"
+        elif self.radioButton_binVM.isChecked():
+            video_mode = "binary"
+        return video_mode
+
+    def getBoundary(self):
+        return self.checkBox_showboundaryVM.isChecked()
+
+    def getRoi(self):
+        return self.checkBox_showroiVM.isChecked()
+
+    def getBackgroundSubtraction(self):
+        if self.radioButton_BsMOG.isChecked():
+            background_subtraction = "mog"
+        elif self.radioButton_BsMA.isChecked():
+            background_subtraction = "ma"
+        return background_subtraction
+
+    def getDetectLine(self):
+        detectX1 = self.lineEdit_detectX1.text()
+        detectY1 = self.lineEdit_detectY1.text()
+        detectX2 = self.lineEdit_detectX2.text()
+        detectY2 = self.lineEdit_detectY2.text()
+        return detectX1, detectY1, detectX2, detectY2
+
+    def getRegistrationLine(self):
+        registX1 = self.lineEdit_registX1.text()
+        registY1 = self.lineEdit_registY1.text()
+        registX2 = self.lineEdit_registX2.text()
+        registY2 = self.lineEdit_registY2.text()
+        return registX1, registY1, registX2, registY2
 
     # Function Menu Bar
     # Menu File
@@ -196,48 +259,35 @@ class MainInit(QMainWindow, main_ui):
         initMBO = None
 
         # Get video mode
-        if self.radioButton_rgbVM.isChecked():
-            video_mode = "rgb"
-        elif self.radioButton_binVM.isChecked():
-            video_mode = "binary"
+        video_mode = self.getVideoMode()
 
         # Get video mode
-        boundary = self.checkBox_showboundaryVM.isChecked()
-        roi = self.checkBox_showroiVM.isChecked()
+        boundary = self.getBoundary()
+        roi = self.getRoi()
 
         # Get background subtraction
-        if self.radioButton_BsMOG.isChecked():
-            background_subtraction = "mog"
-        elif self.radioButton_BsMA.isChecked():
-            background_subtraction = "ma"
+        background_subtraction = self.getBackgroundSubtraction()
 
         # Get camera setting
-        alt = self.lineEdit_altitudeCam.text()
-        elevated = self.lineEdit_elevatedCam.text()
-        fps = self.lineEdit_fps.text()
-        focal = self.lineEdit_focal.text()
+        alt = self.getAlt()
+        elevated = self.getElevated()
+        fps = self.getFps()
+        focal = self.getFocal()
 
         # Get vehicle dimension
         # Light vehicle dimension
-        length_LV = self.lineEdit_pLV.text()
-        width_LV = self.lineEdit_lLV.text()
-        high_LV = self.lineEdit_tLV.text()
+        length_LV = self.getLengthLV()
+        width_LV = self.getWidthLV()
+        high_LV = self.getHighLV()
 
         # Heavy vehicle dimension
-        length_HV = self.lineEdit_pHV.text()
-        width_HV = self.lineEdit_lHV.text()
-        high_HV = self.lineEdit_tHV.text()
+        length_HV = self.getLengthHV()
+        width_HV = self.getWidthHV()
+        high_HV = self.getHighHV()
 
         # Registration and detection line
-        detectX1 = self.lineEdit_detectX1.text()
-        detectY1 = self.lineEdit_detectY1.text()
-        detectX2 = self.lineEdit_detectX2.text()
-        detectY2 = self.lineEdit_detectY2.text()
-
-        registX1 = self.lineEdit_registX1.text()
-        registY1 = self.lineEdit_registY1.text()
-        registX2 = self.lineEdit_registX2.text()
-        registY2 = self.lineEdit_registY2.text()
+        detectX1, detectY1, detectX2, detectY2 = self.getDetectLine()
+        registX1, registY1, registX2, registY2 = self.getRegistrationLine()
 
         print "Camera Input"
         print "video input: {0}".format(fileLoc)
@@ -333,4 +383,3 @@ class MainInit(QMainWindow, main_ui):
 
     def ujicoba(self):
         print "Open new popup"
-

@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import vehicle_tracking as proc
+import _main_init as mi
 import time
 
 from PyQt4 import QtGui, QtCore
@@ -30,6 +31,8 @@ class QtCapture(QtGui.QFrame, video_frame):
         self.setupUi(self)
 
         # Start Capture Video
+        instance = mi.MainInit()
+        print instance.getAlt()
         self.cap = cv2.VideoCapture(filename)
 
         # Initiation to moving average
@@ -106,10 +109,10 @@ class QtCapture(QtGui.QFrame, video_frame):
         #gray_frame = proc.convRGB2GRAY(subtract_frame)
 
         # Add frame rate text
-        #proc.addText(gray_frame, "frame: {0}".format(frame), 1, 850, 525)
+        #proc.addText(rgb_frame, "frame: {0}".format(mi.MainInit.getAlt()), 1, 850, 525)
 
         # Last variable to show must 'show_frame'
-        show_frame = movingAverage
+        show_frame = rgb_frame
 
         # ---------- Do not disturb this source code ----------- #
         threeChannels = True

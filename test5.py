@@ -15,6 +15,9 @@ kernel = np.ones((5,5),np.float32)/25
 gray_background = cv2.cvtColor(img_back, cv2.COLOR_RGB2GRAY)
 gray_foreground = cv2.cvtColor(img_fore, cv2.COLOR_RGB2GRAY)
 
+
+cv2.imwrite("samples/grayforeground.jpg", gray_foreground)
+
 #gray_foreground = cv2.blur(gray_foreground, (5,5))
 #gray_background = cv2.blur(gray_background,(5,5))
 # Background subtraction
@@ -103,7 +106,6 @@ edge_canny = cv2.Canny(mask, 100,150)
 
 cv2.imshow("edge", img_fore)
 cv2.imshow("binary", im_floodfill)
-#cv2.imwrite("samples/binaryImage.jpg", im_floodfill)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()

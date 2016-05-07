@@ -61,20 +61,21 @@ def pinholeModel(W, f, H, theta, x1, x2):
     # X2G -> |X2G| : jarak belakang kendaraan dengan titik blindspot belakang kendaraan (m)
     estimationVehicleHigh = 0
 
-    delta1 = math.atan((x1 - W) / 2 * f)
-    delta2 = math.atan((x2 - W) / 2 * f)
+    delta1 = math.degrees(math.atan(math.fabs(x1-(W/2))/f))
+    delta2 = math.degrees(math.atan(math.fabs(x2-(W/2))/f))
 
     if x1 >= W/2:
-        Lx1 = H * math.tan(theta + delta1)
+        Lx1 = H * math.tan(math.radians(theta + delta1))
     else:
-        Lx1 = H * math.tan(theta - delta1)
+        Lx1 = H * math.tan(math.radians(theta - delta1))
 
     if x2 >= W/2:
-        Lx2 = H * math.tan(theta + delta2)
-        X2G = estimationVehicleHigh * math.tan(theta + delta2)
+        Lx2 = H * math.tan(math.radians(theta + delta2))
+        X2G = estimationVehicleHigh * math.tan(math.radians(theta + delta2))
     else:
-        Lx2 = H * math.tan(theta - delta2)
-        X2G = estimationVehicleHigh * math.tan(theta + delta2)
+        Lx2 = H * math.tan(math.radians(theta - delta2))
+        X2G = estimationVehicleHigh * math.tan(math.radians(theta + delta2))
 
     Lv = Lx1 - (Lx2 + X2G)
+    print "delta1: {0} | delta2: {1} | Lx1: {2} | Lx2: {3} | X2G: {4} | Lv: {5}".format(delta1, delta2, Lx1, Lx2, X2G, Lv)
     return Lv
