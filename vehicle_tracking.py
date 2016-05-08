@@ -10,44 +10,41 @@ def addText(frame, text, size, x, y):
     font = cv2.FONT_HERSHEY_PLAIN
     cv2.putText(frame, "{0}".format(text), (x, y), font, size, (255, 255, 0), 1)
 
-def convBGR2RGB(frame):
+def cvtBGR2RGB(frame):
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     return frame
 
-def convRGB2GRAY(frame):
+def cvtRGB2GRAY(frame):
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
     return frame
 
-def convRGB2HSV(frame):
+def cvtRGB2HSV(frame):
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
     return frame
 
-def initBackgrounSubtraction(real_time, start_time, alpha):
-    if real_time < start_time + alpha:
+def cvtGRAY2RGB(frame):
+    frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
+    return frame
+
+def initBackgrounSubtraction(real_time, start_time, init_time):
+    if real_time < start_time + init_time:
         # print "initiation background subtraction"
         return False
     else:
         # print "background subtraction found"
         return True
 
-def morfOpening(bin_frame, kernel, iteration):
-    for iteration in range(1, iteration):
+def morphOpening(bin_frame, kernel, iteration):
+    for iteration in range(0, iteration):
         bin_frame = cv2.erode(bin_frame, kernel)
         bin_frame = cv2.dilate(bin_frame, kernel)
     return bin_frame
 
-def morfClosing(bin_frame, kernel, iteration):
+def morphClosing(bin_frame, kernel, iteration):
     for iteration in range(1, iteration):
         bin_frame = cv2.dilate(bin_frame, kernel)
         bin_frame = cv2.erode(bin_frame, kernel)
     return bin_frame
-
-def kernel():
-    kernel = np.array([
-        [0, 0, 0],
-        [1, 1, 1],
-        [0, 0, 0]], dtype=np.uint8)
-    return kernel
 
 def pinholeModel(W, f, H, theta, x1, x2):
     # W : jumlah baris (piksel)
@@ -80,17 +77,42 @@ def pinholeModel(W, f, H, theta, x1, x2):
     print "delta1: {0} | delta2: {1} | Lx1: {2} | Lx2: {3} | X2G: {4} | Lv: {5}".format(delta1, delta2, Lx1, Lx2, X2G, Lv)
     return Lv
 
-def shadowRemoval():
+def shadowRemoval(RGB_frame, Bin_frame):
     x = 5
 
-def contourDetection():
-    print "contour"
+def contourDetection(PrimRGB_frame, Binary_frame):
+    color = (0, 255, 0)
+    thick = 3
+
+    im2, contours, hierarchy = cv2.findContours(Binary_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # draw = cv2.drawContours(PrimRGB_frame, contours, -1, color, thick)
+
+    contourList = len(contours)
+
+    for i in range(0, contourList):
+        cnt = contours[i]
+        M = cv2.moments(cnt)
+        # print M
+
+        #cx = int(M['m10'] / M['m00'])
+        #cy = int(M['m01'] / M['m00'])
+
+        x, y, w, h = cv2.boundingRect(cnt)
+        centeroidX = (x + w)/2
+        centeroidY = (y + h)/2
+        cv2.rectangle(PrimRGB_frame, (x, y), (x + w, y + h), color, thick)
+
+    return PrimRGB_frame
 
 def blobDetector():
     print "blob"
 
-def backgroundSubtractionAverage():
-    print "bs"
+def backgroundSubtractionAverage(frame_ori, avg, alpha):
+    accuWeight = cv2.accumulateWeighted(frame_ori, avg, alpha)
+    cvtScaleAbs = cv2.convertScaleAbs(accuWeight)
+    return cvtScaleAbs
 
-def backgroundSubtractionMoG():
-    print "mog"
+def backgroundSubtractionMoG(frame):
+    initMOG2 = cv2.createBackgroundSubtractorMOG2()
+    MOG2_frame = initMOG2.apply(frame)
+    return MOG2_frame
