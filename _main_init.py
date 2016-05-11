@@ -78,16 +78,9 @@ class MainInit(QMainWindow, main_ui):
 
         # 1.4.3 Registration and Detection Line
         # 1.4.3.1 Detection Line
-        self.lineEdit_detectX1.setText(format("500"))
-        self.lineEdit_detectY1.setText(format("450"))
-        self.lineEdit_detectX2.setText(format("840"))
-        self.lineEdit_detectY2.setText(format("450"))
+        self.setDetectionLine("500", "450", "840", "450")
         # 1.4.3.2 Registration Line
-        self.lineEdit_registX1.setText(format("530"))
-        self.lineEdit_registY1.setText(format("200"))
-        self.lineEdit_registX2.setText(format("8000"))
-        self.lineEdit_registY2.setText(format("200"))
-
+        self.setRegistrationLine("530", "200", "800", "200")
         # 1.5 Button Help and Set
         self.pushButton_helpSetting.clicked.connect(self.helpSetting)
         self.pushButton_setSetting.clicked.connect(self.setSetting)
@@ -118,12 +111,9 @@ class MainInit(QMainWindow, main_ui):
         # 3.2   View Log
         # self.tableView_searchLog()
         self.setLogCountLV("10")
-        self.label_logcountLongVehicle.setText("0")
+        self.setLogCountHV("90")
 
     # Set Variable
-    def setLogCountLV(self, value):
-        self.label_logcountShortVehicle.setText(value)
-
     def setAlt(self, value):
         self.lineEdit_altitudeCam.setText(format(value))
 
@@ -218,6 +208,12 @@ class MainInit(QMainWindow, main_ui):
 
     def setLabelHV(self, value):
         self.label_countLongVehicle.setText(value)
+
+    def setLogCountLV(self, value):
+        self.label_logcountShortVehicle.setText(value)
+
+    def setLogCountHV(self, value):
+        self.label_logcountLongVehicle.setText(value)
 
     # Get Variable
     def getVideoMode(self):
@@ -401,6 +397,8 @@ class MainInit(QMainWindow, main_ui):
 
             self.capture.setVideoMode(video_mode)
             self.capture.setBackgroundSubtraction(background_subtraction)
+            self.capture.setROI(roi)
+            self.capture.setBoundary(boundary)
 
             self.capture.setFPS(fps)
             self.capture.setAlt(alt)
@@ -420,14 +418,14 @@ class MainInit(QMainWindow, main_ui):
             self.capture.setParent(self.video_frame)
 
             # Get Variable
-            fps = self.capture.getLabelFPS()
-            self.setLabelFPS(fps)
+            #fps = self.capture.getLabelFPS()
+            self.setLabelFPS(90)
 
-            labelLV = str(self.capture.getLabelLV())
-            self.setLabelLV(labelLV)
+            #labelLV = str(self.getLabel())
+            self.setLabelLV("10")
 
-            labelHV = str(self.capture.getLabelHV())
-            self.setLabelHV(labelHV)
+            #labelHV = str(self.capture.getLabelHV())
+            self.setLabelHV("90")
 
         self.capture.start()
         self.capture.show()

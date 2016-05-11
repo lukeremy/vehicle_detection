@@ -36,6 +36,18 @@ class QtCapture(QtGui.QFrame, video_frame):
     def getBackgroundSubtraction(self):
         return self.backgroundSubtracion
 
+    def setBoundary(self, boundary):
+        self.boudary = boundary
+
+    def getBoundary(self):
+        return self.boudary
+
+    def setROI(self, roi):
+        self.roi = roi
+
+    def getROI(self):
+        return self.roi
+
     def setFPS(self, fps):
         self.fps = fps
 
@@ -114,11 +126,15 @@ class QtCapture(QtGui.QFrame, video_frame):
     def getRegistrationLine(self):
         return self.registX1, self.registY1, self.registX2, self.registY2
 
+    def setLabelFPS(self, fps):
+        self.fps = fps
+
     def getLabelFPS(self):
-        return 10
+        value = self.fps
+        return value
 
     def getLabelLV(self):
-        return 80
+        return self
 
     def getLabelHV(self):
         return 190
@@ -146,6 +162,9 @@ class QtCapture(QtGui.QFrame, video_frame):
         self.timer.timeout.connect(self.nextFrame)
         self.timer.start(1000. / self.getFPS())
         start_time = time.time()
+
+        #instance = mi.MainInit()
+        #instance.setLabel(90)
 
         #print format(start_time)
         #print format(self.alt)
@@ -201,9 +220,15 @@ class QtCapture(QtGui.QFrame, video_frame):
             # Convert RGB to Grayscale
             PrimGray_frame = proc.cvtRGB2GRAY(PrimRGB_frame)
             BackgroundGray_frame = proc.cvtRGB2GRAY(movingAverage_frame)
+            PrimHSV_frame = cv2.cvtColor(PrimRGB_frame, cv2.COLOR_RGB2HSV)
+            BackgroundHSV_frame = cv2.cvtColor(movingAverage_frame, cv2.COLOR_RGB2HSV)
+
+            PrimHue, PrimSat, PrimVal = cv2.split(PrimHSV_frame)
+            BackHue, BackSat, BackVal = cv2.split(BackgroundHSV_frame)
 
             # Background Extraction
             ImgDiff = cv2.absdiff(PrimGray_frame, BackgroundGray_frame)
+            #ImgDiff = cv2.absdiff(PrimVal, BackVal)
 
             # Threshold
             _, threshold = cv2.threshold(ImgDiff, 100, 255, cv2.THRESH_OTSU)
@@ -216,13 +241,13 @@ class QtCapture(QtGui.QFrame, video_frame):
         # IS    : ~
         # FS    : ~
         kernel = np.array([
+            [0, 1, 0],
             [1, 1, 1],
-            [1, 1, 1],
-            [1, 1, 1]], dtype=np.uint8)
+            [0, 1, 0]], dtype=np.uint8)
 
-        bin_frame = proc.morphClosing(threshold, kernel, 2)
-        #bin_frame = cv2.erode(threshold, kernel)
-        #bin_frame = cv2.dilate(bin_frame, kernel)
+        bin_frame = proc.morphClosing(threshold, kernel, 1)
+        bin_frame = cv2.erode(bin_frame, kernel)
+        bin_frame = cv2.dilate(bin_frame, kernel)
 
         # -------- [x] Mask RGB Frame and Binary Frame ----------#
         # IS    : ~
@@ -245,22 +270,32 @@ class QtCapture(QtGui.QFrame, video_frame):
         detectX1, detectY1, detectX2, detectY2 = self.getDetectionLine()
         registX1, registY1, registX2, registY2 = self.getRegistrationLine()
 
-        cv2.line(PrimRGB_frame, (detectX1, detectY1), (detectX2, detectY2), detectLine_color, thick)
-        cv2.line(PrimRGB_frame, (registX1, registY1), (registX2, registY2), registLine_color, thick)
+        if self.getROI():
+            cv2.line(PrimRGB_frame, (detectX1, detectY1), (detectX2, detectY2), detectLine_color, thick)
+            cv2.line(PrimRGB_frame, (registX1, registY1), (registX2, registY2), registLine_color, thick)
 
         # ------------- [x] Contour Detection -------------------#
         # IS    :
         # FS    :
 
-        PrimRGB_frame = proc.contourDetection(PrimRGB_frame, bin_frame)
+        if self.getBoundary():
+            PrimRGB_frame = proc.contourDetection(PrimRGB_frame, bin_frame)
+
+        # ------------- [x] Counting Detection -------------------#
+        # IS    :
+        # FS    :
+            centeroidX = 200
+            centeroidY = 400
+            classification = "LV"
+            proc.initCounting(registX1, registY1, registX2, registX2, centeroidX, centeroidY, classification)
 
         # ---------- Do not disturb this source code ----------- #
         if self.getVideoMode() == "RGB":
-            show_frame = maskRGBandBin_frame
+            show_frame = PrimRGB_frame
             img = QtGui.QImage(show_frame, show_frame.shape[1], show_frame.shape[0], QtGui.QImage.Format_RGB888)
             # RGB image - Format_RGB888
         else:
-            show_frame = Canny_EdgeDetection
+            show_frame = bin_frame
             img = QtGui.QImage(show_frame, show_frame.shape[1], show_frame.shape[0], QtGui.QImage.Format_Indexed8)
             # Gray scale, binary image - Format_Indexed8
 
