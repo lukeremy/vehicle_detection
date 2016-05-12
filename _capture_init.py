@@ -1,8 +1,10 @@
 import cv2
 import numpy as np
-import vehicle_tracking as proc
+import image_processing as improc
+import math_operation as mo
 import _main_init as mi
 import time
+import math
 
 from PyQt4 import QtGui, QtCore
 from PyQt4 import uic
@@ -14,8 +16,8 @@ ocl.setUseOpenCL(False)         # set flag OCL to False if you build OPENCV -D W
 video_frame = uic.loadUiType("gtk/video_frame.ui")[0]
 # init variable
 start_time = None
-width = 960     # pixel
-height = 540    # pixel
+width_frame = 960     # pixel
+height_frame = 540    # pixel
 init_time = 3      # second /fps (fps 30) -> 24/30 = 0.8 -> 8 second
 mask_status = False
 mask_frame = None
@@ -149,8 +151,8 @@ class QtCapture(QtGui.QFrame, video_frame):
 
         # Initiation to moving average
         _, PrimImg_frame = self.cap.read()
-        PrimImg_frame = proc.cvtBGR2RGB(PrimImg_frame)
-        PrimImg_frame = cv2.resize(PrimImg_frame, (width, height))
+        PrimImg_frame = improc.cvtBGR2RGB(PrimImg_frame)
+        PrimImg_frame = cv2.resize(PrimImg_frame, (width_frame, height_frame))
         avg = np.float32(PrimImg_frame)
 
     def initSetting(self):
@@ -192,19 +194,19 @@ class QtCapture(QtGui.QFrame, video_frame):
 
         # ----------- Do not disturb this source code ---------- #
         # Default color model is BGR format
-        PrimResize_frame = cv2.resize(PrimImg_frame, (width, height))
-        PrimRGB_frame = proc.cvtBGR2RGB(PrimResize_frame)
+        PrimResize_frame = cv2.resize(PrimImg_frame, (width_frame, height_frame))
+        PrimRGB_frame = improc.cvtBGR2RGB(PrimResize_frame)
 
         # ------ [1] Initiation background subtraction ----------#
-        # IS    : RGB - primary frame
-        # FS    : Binary - foreground frame
+        # Initial State (IS)   : RGB - primary frame
+        # Final State (FS)     : Binary - foreground frame
         if self.getBackgroundSubtraction() == "MA":  # if choose Moving Average
 
             # Moving Average subtraction
-            cvtScaleAbs = proc.backgroundSubtractionAverage(PrimRGB_frame, avg, 0.01)
+            cvtScaleAbs = improc.backgroundSubtractionAverage(PrimRGB_frame, avg, 0.01)
             movingAverage_frame = cvtScaleAbs
 
-            initBackground = proc.initBackgrounSubtraction(real_time, start_time, init_time)
+            initBackground = improc.initBackgrounSubtraction(real_time, start_time, init_time)
             if not mask_status:
                 if not initBackground:
                     print "initiation background subtraction"
@@ -218,8 +220,8 @@ class QtCapture(QtGui.QFrame, video_frame):
                 subtract_frame = mask_frame
 
             # Convert RGB to Grayscale
-            PrimGray_frame = proc.cvtRGB2GRAY(PrimRGB_frame)
-            BackgroundGray_frame = proc.cvtRGB2GRAY(movingAverage_frame)
+            PrimGray_frame = improc.cvtRGB2GRAY(PrimRGB_frame)
+            BackgroundGray_frame = improc.cvtRGB2GRAY(movingAverage_frame)
             PrimHSV_frame = cv2.cvtColor(PrimRGB_frame, cv2.COLOR_RGB2HSV)
             BackgroundHSV_frame = cv2.cvtColor(movingAverage_frame, cv2.COLOR_RGB2HSV)
 
@@ -245,14 +247,14 @@ class QtCapture(QtGui.QFrame, video_frame):
             [1, 1, 1],
             [0, 1, 0]], dtype=np.uint8)
 
-        bin_frame = proc.morphClosing(threshold, kernel, 1)
+        bin_frame = improc.morphClosing(threshold, kernel, 1)
         bin_frame = cv2.erode(bin_frame, kernel)
         bin_frame = cv2.dilate(bin_frame, kernel)
 
         # -------- [x] Mask RGB Frame and Binary Frame ----------#
         # IS    : ~
         # FS    : ~
-        ThreeChanelBinary_frame = proc.cvtGRAY2RGB(threshold)
+        ThreeChanelBinary_frame = improc.cvtGRAY2RGB(threshold)
         maskRGBandBin_frame = cv2.bitwise_and(PrimRGB_frame, ThreeChanelBinary_frame)
         Canny_EdgeDetection = cv2.Canny(maskRGBandBin_frame, 100, 150)
 
@@ -279,15 +281,54 @@ class QtCapture(QtGui.QFrame, video_frame):
         # FS    :
 
         if self.getBoundary():
-            PrimRGB_frame = proc.contourDetection(PrimRGB_frame, bin_frame)
+            PrimRGB_frame = improc.contourDetection(PrimRGB_frame, bin_frame)
+            image, contours, hierarchy = cv2.findContours(bin_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+            contoursList = len(contours)
 
-        # ------------- [x] Counting Detection -------------------#
-        # IS    :
-        # FS    :
-            centeroidX = 200
-            centeroidY = 400
-            classification = "LV"
-            proc.initCounting(registX1, registY1, registX2, registX2, centeroidX, centeroidY, classification)
+            for i in range(0, contoursList):
+                cnt = contours[i]
+
+                xContour, yContour, widthContour, highContour = cv2.boundingRect(cnt)
+                xCenteroid = (xContour + (xContour + widthContour)) / 2
+                yCenteroid = (yContour + (yContour + highContour)) / 2
+
+                # ----------------- [x] Pin Hole Model -------------------#
+                # IS    :
+                # FS    :
+                fov_w = self.getFocal()
+                theta = self.getElevated()
+                altitude = self.getAlt()
+                maxHighLV = self.getHighLV()
+                maxHighHV = self.getHighHV()
+                maxLengthLV = self.getLengthLV()
+                x1Vehicle = (yContour + highContour)
+                x2Vehicle = yContour
+
+                focal = ((width_frame / 2) / math.tan(math.radians(fov_w / 2)))
+                fov_h = math.degrees(math.atan((height_frame / 2) / focal))
+                lengthVehicle = mo.pinholeModel(height_frame, focal, altitude, theta, x1Vehicle, x2Vehicle, maxHighLV, maxHighHV, maxLengthLV)
+
+                # ----------------- [x] Draw Boundary -------------------#
+                # IS    :
+                # FS    :
+                color = (0, 255, 0)
+                thick = 3
+
+                if (widthContour >= 100) & (widthContour < 200):
+                    cv2.rectangle(PrimRGB_frame, (xContour + widthContour, yContour + highContour), (xContour, yContour), color, thick)
+                    cv2.line(PrimRGB_frame, (xCenteroid, yCenteroid), (xCenteroid, yCenteroid), (0, 0, 255), thick)
+
+                # ------------- [x] Vehicle Classification ---------------#
+                # IS    :
+                # FS    :
+                if lengthVehicle <= maxlengthLV:
+                    classification = "LV"
+                else:
+                    classification = "HV"
+                # ------------- [x] Counting Detection -------------------#
+                # IS    :
+                # FS    :
+                improc.initCounting(registX1, registY1, registX2, registX2, xCenteroid, yCenteroid, classification)
 
         # ---------- Do not disturb this source code ----------- #
         if self.getVideoMode() == "RGB":
