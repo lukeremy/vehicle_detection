@@ -230,7 +230,7 @@
          <x>10</x>
          <y>30</y>
          <width>381</width>
-         <height>131</height>
+         <height>161</height>
         </rect>
        </property>
        <property name="font">
@@ -395,19 +395,6 @@
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
-       <widget class="QLabel" name="label_focalLength">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>103</y>
-          <width>141</width>
-          <height>17</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Focal length </string>
-        </property>
-       </widget>
        <widget class="QLineEdit" name="lineEdit_focal">
         <property name="geometry">
          <rect>
@@ -446,12 +433,38 @@
          <string>mm</string>
         </property>
        </widget>
+       <widget class="QRadioButton" name="radioButton_focalLength">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>100</y>
+          <width>102</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Focal length</string>
+        </property>
+       </widget>
+       <widget class="QRadioButton" name="radioButton_fieldofview">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>120</y>
+          <width>102</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Field of view </string>
+        </property>
+       </widget>
       </widget>
       <widget class="QGroupBox" name="groupBox_dataInputVehicle">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>170</y>
+         <y>220</y>
          <width>381</width>
          <height>101</height>
         </rect>
@@ -705,7 +718,7 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>280</y>
+         <y>330</y>
          <width>381</width>
          <height>121</height>
         </rect>
@@ -1423,7 +1436,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>23</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAbout">

@@ -61,10 +61,10 @@ class MainInit(QMainWindow, main_ui):
 
         # 1.4   Data Input
         # 1.4.1 Camera
-        self.setAlt(20)
+        self.setAlt(6)
         self.setElevated(20)
         self.setFps(30)
-        self.setFocal(15)
+        self.setFocal(90)
 
         # 1.4.2 Vehicle Input
         # 1.4.2.1 Light Vehicle

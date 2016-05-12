@@ -281,7 +281,7 @@ class QtCapture(QtGui.QFrame, video_frame):
         # FS    :
 
         if self.getBoundary():
-            PrimRGB_frame = improc.contourDetection(PrimRGB_frame, bin_frame)
+            # PrimRGB_frame = improc.contourDetection(PrimRGB_frame, bin_frame)
             image, contours, hierarchy = cv2.findContours(bin_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
             contoursList = len(contours)
 
@@ -317,18 +317,19 @@ class QtCapture(QtGui.QFrame, video_frame):
                 if (widthContour >= 100) & (widthContour < 200):
                     cv2.rectangle(PrimRGB_frame, (xContour + widthContour, yContour + highContour), (xContour, yContour), color, thick)
                     cv2.line(PrimRGB_frame, (xCenteroid, yCenteroid), (xCenteroid, yCenteroid), (0, 0, 255), thick)
-
+                    improc.addText(PrimRGB_frame, lengthVehicle, 3, xContour, yContour - 3)
                 # ------------- [x] Vehicle Classification ---------------#
                 # IS    :
                 # FS    :
-                if lengthVehicle <= maxlengthLV:
+                if lengthVehicle <= maxLengthLV:
                     classification = "LV"
                 else:
                     classification = "HV"
                 # ------------- [x] Counting Detection -------------------#
                 # IS    :
                 # FS    :
-                improc.initCounting(registX1, registY1, registX2, registX2, xCenteroid, yCenteroid, classification)
+                yPredict = mo.funcY_line(registX1, registY1, registX2, registY2, xCenteroid)
+                improc.initCounting(registX1, registY1, registX2, registX2, xCenteroid, yPredict, classification)
 
         # ---------- Do not disturb this source code ----------- #
         if self.getVideoMode() == "RGB":
