@@ -42,9 +42,6 @@ def morphClosing(bin_frame, kernel, iteration):
         bin_frame = cv2.erode(bin_frame, kernel)
     return bin_frame
 
-def shadowRemoval(RGB_frame, Bin_frame):
-    x = 5
-
 def initCounting(registX1, registY1, registX2, registY2, centeroidX, centeroidY, clasification):
     if ((centeroidX >= registX1) & (centeroidX <= registX2)) & ((centeroidY >= registY1) & (centeroidY <= registY2)):
         return clasification
@@ -53,10 +50,6 @@ def backgroundSubtractionAverage(frame_ori, avg, alpha):
     accuWeight = cv2.accumulateWeighted(frame_ori, avg, alpha)
     cvtScaleAbs = cv2.convertScaleAbs(accuWeight)
     return cvtScaleAbs
-
-def croppingImage(frame, x1, y1, x2, y2, filename):
-    crop = frame[y1:y2, x1:x2]  #y1:y+h, x:x+w
-    cv2.imwrite("{0}.jpg".format(filename), crop)
 
 def backgroundSubtractionMoG(frame):
     initMOG2 = cv2.createBackgroundSubtractorMOG2()

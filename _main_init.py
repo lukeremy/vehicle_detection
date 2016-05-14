@@ -27,7 +27,11 @@ class MainInit(QMainWindow, main_ui):
         port_cam = ["0", "1", "2"]
         # Menu Bar
         # File
+        self.actionOpen_settings.triggered.connect(self.selectConfigFile)
+        self.actionSave_settings.triggered.connect(self.saveConfigFile)
         self.actionExit.triggered.connect(self.file_exit)
+        # About
+        self.actionHelp.triggered.connect(self.helpSetting)
 
         # 1.    Setting
         self.tabWidget.setCurrentIndex(0)
@@ -47,7 +51,7 @@ class MainInit(QMainWindow, main_ui):
 
         self.label_selectFile.setText('')
         self.pushButton_selectFile.setEnabled(False)
-        self.pushButton_selectFile.clicked.connect(self.selectFile)
+        self.pushButton_selectFile.clicked.connect(self.selectVideoFile)
 
         # 1.2.  VideoMode
         self.radioButton_rgbVM.setChecked(True)
@@ -64,7 +68,16 @@ class MainInit(QMainWindow, main_ui):
         self.setAlt(6)
         self.setElevated(20)
         self.setFps(30)
-        self.setFocal(90)
+        self.setFocal(0)
+        self.setFOV(90)
+
+        self.radioButton_focalLength.setChecked(False)
+        self.radioButton_fieldofview.setChecked(True)
+
+        self.lineEdit_focalCam.setEnabled(False)
+        self.lineEdit_fieldofviewCam.setEnabled(True)
+
+        self.radioButton_focalLength.toggled.connect(self.radioChooseFocal)
 
         # 1.4.2 Vehicle Input
         # 1.4.2.1 Light Vehicle
@@ -78,9 +91,9 @@ class MainInit(QMainWindow, main_ui):
 
         # 1.4.3 Registration and Detection Line
         # 1.4.3.1 Detection Line
-        self.setDetectionLine("500", "450", "840", "450")
+        self.setDetectionLine("420", "123", "532", "123")
         # 1.4.3.2 Registration Line
-        self.setRegistrationLine("530", "200", "800", "200")
+        self.setRegistrationLine("342", "325", "619", "325")
         # 1.5 Button Help and Set
         self.pushButton_helpSetting.clicked.connect(self.helpSetting)
         self.pushButton_setSetting.clicked.connect(self.setSetting)
@@ -93,9 +106,6 @@ class MainInit(QMainWindow, main_ui):
 
         # 2.2   Capture
         # self.tableView_Capture()
-        self.setLabelLV("0")
-        self.setLabelHV("0")
-        self.setLabelFPS("0")
 
         # 3.    Log
         # 3.1   Search
@@ -133,10 +143,16 @@ class MainInit(QMainWindow, main_ui):
         return self.lineEdit_fps.text()
 
     def setFocal(self, value):
-        self.lineEdit_focal.setText(format(value))
+        self.lineEdit_focalCam.setText(format(value))
 
     def getFocal(self):
-        return self.lineEdit_focal.text()
+        return self.lineEdit_focalCam.text()
+
+    def setFOV(self, value):
+        self.lineEdit_fieldofviewCam.setText(format(value))
+
+    def getFOV(self):
+        return self.lineEdit_fieldofviewCam.text()
 
     def setLengthLV(self, value):
         self.lineEdit_pLV.setText(format(value))
@@ -200,15 +216,6 @@ class MainInit(QMainWindow, main_ui):
         registY2 = self.lineEdit_registY2.text()
         return registX1, registY1, registX2, registY2
 
-    def setLabelFPS(self, value):
-        self.label_videoFps.setText("frame : {0}".format(value))
-
-    def setLabelLV(self, value):
-        self.label_countShortVehicle.setText(value)
-
-    def setLabelHV(self, value):
-        self.label_countLongVehicle.setText(value)
-
     def setLogCountLV(self, value):
         self.label_logcountShortVehicle.setText(value)
 
@@ -242,6 +249,76 @@ class MainInit(QMainWindow, main_ui):
         print "good bye bro.."
         sys.exit()
 
+    def parsingConfigFile(self, filename):
+        pars_content = open(filename, "r")
+        return pars_content.read()
+
+    def selectConfigFile(self):
+        filename = QFileDialog.getOpenFileName(self, "Open config file", 'conf', "*.conf", None)
+        parsing = self.parsingConfigFile(filename)
+        split = parsing.split(" ")
+
+        altitude, elevated, fps, focal, fov = split[0], split[1], split[2], split[3], split[4]
+        length_LV, width_LV, high_LV = split[5], split[6], split[7]
+        length_HV, width_HV, high_HV = split[8], split[9], split[10]
+        detectX1, detectY1, detectX2, detectY2 = split[11], split[12], split[13], split[14]
+        registX1, registY1, registX2, registY2 = split[15], split[16], split[17], split[18]
+
+        # 1.4.1 Camera
+        self.setAlt(altitude)
+        self.setElevated(elevated)
+        self.setFps(fps)
+        self.setFocal(focal)
+        self.setFOV(fov)
+
+        # 1.4.2 Vehicle Input
+        # 1.4.2.1 Light Vehicle
+        self.setLengthLV(length_LV)
+        self.setWidthLV(width_LV)
+        self.setHighLV(high_LV)
+        # 1.4.2.1 Heavy Vehicle
+        self.setLengthHV(length_HV)
+        self.setWidthHV(width_HV)
+        self.setHighHV(high_HV)
+
+        # 1.4.3 Registration and Detection Line
+        # 1.4.3.1 Detection Line
+        self.setDetectionLine(detectX1, detectY1, detectX2, detectY2)
+        # 1.4.3.2 Registration Line
+        self.setRegistrationLine(registX1, registY1, registX2, registY2)
+
+    def saveConfigFile(self):
+        filename = QFileDialog.getSaveFileName(self, "Save config file", 'conf', "*.conf", None)
+        saveFile = open("{0}.conf".format(filename), "a")
+
+        # Camera
+        alt = self.getAlt()
+        elevated = self.getElevated()
+        fps = self.getFps()
+        focal = self.getFocal()
+        fov = self.getFOV()
+
+        # Light vehicle dimension
+        length_LV = self.getLengthLV()
+        width_LV = self.getWidthLV()
+        high_LV = self.getHighLV()
+
+        # Heavy vehicle dimension
+        length_HV = self.getLengthHV()
+        width_HV = self.getWidthHV()
+        high_HV = self.getHighHV()
+
+        # Registration and detection line
+        detectX1, detectY1, detectX2, detectY2 = self.getDetectLine()
+        registX1, registY1, registX2, registY2 = self.getRegistrationLine()
+
+        saveFile.write("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17} {18}".format(
+            alt, elevated, fps, focal, fov, length_LV, width_LV, high_LV, length_HV, width_HV, high_HV,
+            detectX1, detectY1, detectX2, detectY2, registX1, registY1, registX2, registY2
+        ))
+        saveFile.flush()
+        saveFile.close()
+
     # Function Tab 1. Setting
     def cekVideoInput(self):
         if self.radioButton_choseFile.setChecked(True):
@@ -249,11 +326,11 @@ class MainInit(QMainWindow, main_ui):
         elif self.radioButton_choseDevice.setChecked(True):
             print "Device"
 
-    def selectFile(self):
+    def selectVideoFile(self):
         global fileLoc
 
         file_filter = "Movie (*.mp4 *.avi *.mkv)"
-        filename = QFileDialog.getOpenFileName(self, "Open File", '', file_filter, None,
+        filename = QFileDialog.getOpenFileName(self, "Open video file", 'samples', file_filter, None,
                                                QFileDialog.DontUseNativeDialog)
 
         print "file yg di select {0}".format(filename)
@@ -285,15 +362,17 @@ class MainInit(QMainWindow, main_ui):
         else:
             self.comboBox_choseDevice.setEnabled(False)
 
-    def radioMBO(self, enabled):
+    def radioChooseFocal(self, enabled):
         if enabled:
-            self.label_initBackground.setEnabled(True)
-            self.lineEdit_initBackground.setEnabled(True)
-            self.label_initBackgroundSecond.setEnabled(True)
+            self.lineEdit_fieldofviewCam.setEnabled(False)
+            self.lineEdit_focalCam.setEnabled(True)
+            self.lineEdit_focalCam.setText(format(160))
+            self.lineEdit_fieldofviewCam.setText(format(0))
         else:
-            self.label_initBackground.setEnabled(False)
-            self.lineEdit_initBackground.setEnabled(False)
-            self.label_initBackgroundSecond.setEnabled(False)
+            self.lineEdit_fieldofviewCam.setEnabled(True)
+            self.lineEdit_focalCam.setEnabled(False)
+            self.lineEdit_focalCam.setText(format(0))
+            self.lineEdit_fieldofviewCam.setText(format(90))
 
     def setSetting(self):
         # Get video mode
@@ -309,6 +388,7 @@ class MainInit(QMainWindow, main_ui):
         elevated = float(self.getElevated())
         fps = float(self.getFps())
         focal = float(self.getFocal())
+        fov = float(self.getFOV())
 
         # Light vehicle dimension
         length_LV = float(self.getLengthLV())
@@ -331,7 +411,7 @@ class MainInit(QMainWindow, main_ui):
         # print "init time bsMBO: {0}".format(initMBO)
         print "boundary: {0}".format(boundary)
         print "roi: {0}".format(roi)
-        print "alt: {0} | elevated: {1} | fps: {2} | focal:{3}".format(alt, elevated, fps, focal)
+        print "alt: {0} | elevated: {1} | fps: {2} | focal:{3} | fov: {4}".format(alt, elevated, fps, focal, fov)
         print "Vehicle Input"
         print "LV >> length: {0} | width: {1} | high: {2}".format(length_LV, width_LV, high_LV)
         print "HV >> length: {0} | width: {1} | high: {2}".format(length_HV, width_HV, high_HV)
@@ -367,6 +447,7 @@ class MainInit(QMainWindow, main_ui):
         elevated = int(self.getElevated())
         fps = float(self.getFps())
         focal = float(self.getFocal())
+        fov = float(self.getFOV())
 
         # Light vehicle dimension
         length_LV = float(self.getLengthLV())
@@ -404,6 +485,7 @@ class MainInit(QMainWindow, main_ui):
             self.capture.setAlt(alt)
             self.capture.setElevated(elevated)
             self.capture.setFocal(focal)
+            self.capture.setFOV(fov)
 
             self.capture.setLengthLV(length_LV)
             self.capture.setWidthLV(width_LV)
@@ -416,16 +498,6 @@ class MainInit(QMainWindow, main_ui):
             self.capture.setDetectionLine(detectX1, detectY1, detectX2, detectY2)
             self.capture.setRegistrationLine(registX1, registY1, registX2, registY2)
             self.capture.setParent(self.video_frame)
-
-            # Get Variable
-            #fps = self.capture.getLabelFPS()
-            self.setLabelFPS(90)
-
-            #labelLV = str(self.getLabel())
-            self.setLabelLV("10")
-
-            #labelHV = str(self.capture.getLabelHV())
-            self.setLabelHV("90")
 
         self.capture.start()
         self.capture.show()
@@ -441,7 +513,6 @@ class MainInit(QMainWindow, main_ui):
         self.pushButton_showLog.setVisible(True)
 
     def showLog(self):
-
         time.sleep(1)
 
         self.tabWidget.setTabEnabled(2, True)
@@ -472,3 +543,9 @@ class MainInit(QMainWindow, main_ui):
 
     def clearLog(self):
         self.tableWidget_searchLog.clear()
+
+        hLabel = ["No", "Date", "Time", "Type", "Speed", "Picture"]
+        self.tableWidget_searchLog.setHorizontalHeaderLabels(hLabel)
+
+        self.label_logcountShortVehicle.setText("0")
+        self.label_logcountLongVehicle.setText("0")

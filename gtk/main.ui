@@ -395,7 +395,7 @@
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
-       <widget class="QLineEdit" name="lineEdit_focal">
+       <widget class="QLineEdit" name="lineEdit_focalCam">
         <property name="geometry">
          <rect>
           <x>220</x>
@@ -420,7 +420,7 @@
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
-       <widget class="QLabel" name="label_fpersecond_2">
+       <widget class="QLabel" name="label_focal">
         <property name="geometry">
          <rect>
           <x>330</x>
@@ -450,13 +450,51 @@
         <property name="geometry">
          <rect>
           <x>20</x>
-          <y>120</y>
+          <y>122</y>
           <width>102</width>
           <height>22</height>
          </rect>
         </property>
         <property name="text">
          <string>Field of view </string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_fieldofviewCam">
+        <property name="geometry">
+         <rect>
+          <x>220</x>
+          <y>124</y>
+          <width>91</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="maxLength">
+         <number>3</number>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_fov">
+        <property name="geometry">
+         <rect>
+          <x>330</x>
+          <y>127</y>
+          <width>41</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>degree</string>
         </property>
        </widget>
       </widget>
@@ -1115,32 +1153,6 @@
        <string>Pause</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_ShortVehicle">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>560</y>
-        <width>81</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Light Vehicle</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_LongVehicle">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>580</y>
-        <width>81</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Heavy Vehicle</string>
-      </property>
-     </widget>
      <widget class="QLabel" name="video_frame">
       <property name="geometry">
        <rect>
@@ -1168,57 +1180,6 @@
       </property>
       <property name="text">
        <string>Log</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_videoFps">
-      <property name="geometry">
-       <rect>
-        <x>825</x>
-        <y>580</y>
-        <width>131</width>
-        <height>20</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>TextLabel</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_countShortVehicle">
-      <property name="geometry">
-       <rect>
-        <x>150</x>
-        <y>560</y>
-        <width>56</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::Box</enum>
-      </property>
-      <property name="text">
-       <string>TextLabel</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_countLongVehicle">
-      <property name="geometry">
-       <rect>
-        <x>150</x>
-        <y>580</y>
-        <width>56</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::Box</enum>
-      </property>
-      <property name="text">
-       <string>TextLabel</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </widget>
@@ -1483,7 +1444,7 @@
   </action>
   <action name="actionHelp">
    <property name="text">
-    <string>Applicctions help</string>
+    <string>Help</string>
    </property>
   </action>
   <action name="actionAbout">
