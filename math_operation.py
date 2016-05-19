@@ -9,34 +9,39 @@ def centeroidPinHoleMode(height, focal, altitude, theta, yCoordinate):
 
     delta = math.degrees(math.atan(math.fabs(yCoordinate - (height / 2)) / focal))
 
-    if yCoordinate > height / 2:
+    if yCoordinate >= height / 2:
         Lcenteroid = altitude * math.tan(math.radians(theta + delta))
     else:
         Lcenteroid = altitude * math.tan(math.radians(theta - delta))
 
-    Lcenteroid = round(Lcenteroid, 2)
+    Lcenteroid = round(Lcenteroid, 4)
+
+    if (theta + delta) > 90.0:
+        Lcenteroid = "unknown length"
+
+    # print "delta: {0} | Lcenteroid: {1}".format(delta, Lcenteroid)
     return Lcenteroid
 
-def vertikalPinHoleModel(height, focal, altitude, theta, x1, x2, maxHighLV, maxHighHV, maxLengthLV):
+def vertikalPinHoleModel(height, focal, altitude, theta, y1, y2, maxHighLV, maxHighHV, maxLengthLV):
     # height : jumlah baris (piksel)
     # focal -> |A'O| : focal length (piksel)
     # altitude -> |O'O| : tinggi kamera (m)
     # theta : sudut kemiringan kamera (derajat)
-    # x1' : indeks piksel terdepan kendaraan (kordinat y)
-    # x2' : indeks piksel terbelakang kendaraan (kordinat y)
+    # y1' : indeks piksel terdepan kendaraan (kordinat y)
+    # y2' : indeks piksel terbelakang kendaraan (kordinat y)
     # Lx1 -> |O'X1| : jarak titik terdepan kendaraan dengan kamera (m)
     # Lx2 -> |O'X2| : jarak titik blindspot belakang kendaraan (m)
     # X2G -> |X2G| : jarak belakang kendaraan dengan titik blindspot belakang kendaraan (m)
 
-    delta1 = math.degrees(math.atan(math.fabs(x1 - (height / 2)) / focal))
-    delta2 = math.degrees(math.atan(math.fabs(x2 - (height / 2)) / focal))
+    delta1 = math.degrees(math.atan(math.fabs(y1 - (height / 2)) / focal))
+    delta2 = math.degrees(math.atan(math.fabs(y2 - (height / 2)) / focal))
 
-    if x1 >= height / 2:
+    if y1 >= height / 2:
         Lx1 = altitude * math.tan(math.radians(theta + delta1))
     else:
         Lx1 = altitude * math.tan(math.radians(theta - delta1))
 
-    if x2 >= height / 2:
+    if y2 >= height / 2:
         Lx2 = altitude * math.tan(math.radians(theta + delta2))
     else:
         Lx2 = altitude * math.tan(math.radians(theta - delta2))
@@ -48,37 +53,56 @@ def vertikalPinHoleModel(height, focal, altitude, theta, x1, x2, maxHighLV, maxH
     else:
         estimationVehicleHigh = maxHighHV
 
-    if x2 >= height / 2:
+    if y2 >= height / 2:
         X2G = estimationVehicleHigh * math.tan(math.radians(theta + delta2))
     else:
         X2G = estimationVehicleHigh * math.tan(math.radians(theta - delta2))
 
-    Lv = Lx1 - (Lx2 + X2G)
+    Lv = Lx1 - Lx2
 
     delta1 = round(delta1, 3)
     delta2 = round(delta2, 3)
     Lx1 = round(Lx1, 4)
     Lx2 = round(Lx2, 4)
     X2G = round(X2G, 4)
-    Lv = round(Lv, 2)
+    Lv = round(Lv, 3)
 
-    #print "delta1: {0} | delta2: {1} | Lx1: {2} | Lx2: {3} | X2G: {4} | Lv: {5}".format(delta1, delta2, Lx1, Lx2, X2G, Lv)
+    # print "delta1: {0} | delta2: {1} | Lx1: {2} | Lx2: {3} | X2G: {4} | Lv: {5}".format(delta1, delta2, Lx1, Lx2, X2G, Lv)
     return Lv
 
-def horizontalPinHoleModel(width, height, focal, altitude, theta, x1, x2, yCoordinate):
+def horizontalPinHoleModel(width, focal, altitude, x1, x2, lengthObject):
+    # width : jumlah kolom (piksel)
+    # focal -> |A'O| : focal length (piksel)
+    # altitude -> |O'O| : tinggi kamera (m)
+    # theta : sudut kemiringan kamera (derajat)
+    # lengthObject : jarak objek dengan kamera (m)
+    # x1' : indeks piksel kanan kendaraan (kordinat x)
+    # x2' : indeks piksel kiri kendaraan (kordinat x)
+    # Lw1 -> |O'X1| : jarak titik kanan kendaraan dengan titik tengah kamera (m)
+    # Lw2 -> |O'X2| : jarak titik kiri kendaraan dengan titik tengah kamera (m)
+    # X2G -> |X2G| : jarak belakang kendaraan dengan titik blindspot belakang kendaraan (m)
 
-    widthY = math.fabs(x1 - x2)
     delta1 = math.degrees(math.atan(math.fabs(x1 - (width / 2)) / focal))
     delta2 = math.degrees(math.atan(math.fabs(x2 - (width / 2)) / focal))
 
-    lengthObject = centeroidPinHoleMode(height, focal, altitude, theta, yCoordinate)
-    OX = math.sqrt(math.exp(lengthObject) + math.exp(altitude))
-    widthObject = (widthY * OX) / focal
-    widthObject = round(widthObject, 2)
-    print widthObject
+    OX = math.sqrt(math.pow(lengthObject, 2) + math.pow(altitude, 2))
+
+    Lw1 = math.tan(math.radians(delta1)) * OX
+    Lw2 = math.tan(math.radians(delta2)) * OX
+
+    delta1 = round(delta1, 3)
+    delta2 = round(delta2, 3)
+    lengthObject = round(lengthObject, 2)
+    OX = round(OX, 4)
+    Lw1 = round(Lw1, 4)
+    Lw2 = round(Lw2, 4)
+    widthObject = round(math.fabs(Lw2 - Lw1), 3)
+
+    # print "delta1: {0} | delta2: {1} | Length: {2} | OX: {3} | Lw1: {4} | Lw2: {5} | widthObject: {6}".format(delta1, delta2, lengthObject, OX, Lw1, Lw2, widthObject)
+    return widthObject
 
 def funcY_line(x1, y1, x2, y2, X):
-    # m : gradien garis
+    # m : line gradient
     # y - y1 = m (x -x1)
     # y = m (x - x1) + y
 
@@ -94,7 +118,7 @@ def funcY_line(x1, y1, x2, y2, X):
     return Y
 
 def funcX_line(x1, y1, x2, y2, Y):
-    # m : gradien garis
+    # m : line gradient
     # y - y1 = m (x -x1)
     # x = ((y - y1) + (m * x1)) /m
 
@@ -111,4 +135,17 @@ def funcX_line(x1, y1, x2, y2, Y):
 
 def getFocalfromFOV(width, fov):
     focal = (width / 2) / math.tan(math.radians(fov / 2))
+    focal *= 3.779527559055
     return focal
+
+def transformDiagonalFOV(fov):
+    if fov == "90":
+        horizontalFOV = 78.4
+        verticalFOV = 44.1
+    elif fov == "127":
+        horizontalFOV = 113.3
+        verticalFOV = 63.7
+    elif fov == "160":
+        horizontalFOV = 139.5
+        verticalFOV = 78.4
+    return horizontalFOV, verticalFOV

@@ -22,6 +22,8 @@ init_time = 12  # second /fps (fps 30) -> 24/30 = 0.8 -> 8 second
 mask_status = False
 mask_frame = None
 frame = 0
+total_LV = 0
+total_HV = 0
 initMOG2 = cv2.createBackgroundSubtractorMOG2()  # Mixture of Gaussian initialization
 initMOG = cv2.bgsegm.createBackgroundSubtractorMOG()
 
@@ -108,7 +110,7 @@ class QtCapture(QtGui.QFrame, video_frame):
         self.widthHV = widthHV
 
     def getWidthHV(self):
-        return self.getWidthHV()
+        return self.widthHV
 
     def setHighHV(self, highHV):
         self.highHV = highHV
@@ -171,7 +173,7 @@ class QtCapture(QtGui.QFrame, video_frame):
         super(QtGui.QFrame, self).deleteLater()
 
     def nextFrame(self):
-        global mask_status, mask_frame, frame
+        global mask_status, mask_frame, frame, total_HV, total_LV
         real_time = time.time()
         ret, PrimImg_frame = self.cap.read()
         frame += 1
@@ -225,10 +227,6 @@ class QtCapture(QtGui.QFrame, video_frame):
             PrimLight, PrimA, PrimB = cv2.split(PrimLAB_frame)
             BackLight, BackA, BackB = cv2.split(BackgroundLAB_frame)
 
-        # -- [x] Smoothing and Noise Reduction --------------------#
-        # IS    :
-        # FS    :
-
         # -- [x] Background Extraction ---------------------------#
         # IS    :
         # FS
@@ -240,11 +238,19 @@ class QtCapture(QtGui.QFrame, video_frame):
             combineRGBHSV = cv2.bitwise_or(ImgDiffRGB, ImgDiffHSV)
             combineLABHSV = cv2.bitwise_or(ImgDiffLAB, ImgDiffHSV)
 
+        # -- [x] Smoothing and Noise Reduction --------------------#
+        # IS    :
+        # FS    :
+        blurLevel = 35
+        gaussianBlur_frame = cv2.GaussianBlur(combineLABHSV, (blurLevel, blurLevel), 0)
+
         # -- [x] Thresholds to Binary ----------------------------#
         # IS    :
         # FS    :
+        thresholdLevel = 20
         if self.getBackgroundSubtraction() == 'MA':  # Moving Averages
-            _, threshold = cv2.threshold(combineRGBHSV, 100, 255, cv2.THRESH_OTSU)
+            # _, threshold = cv2.threshold(combineLABHSV, 100, 255, cv2.THRESH_OTSU)
+            _, threshold = cv2.threshold(gaussianBlur_frame, thresholdLevel, 255, cv2.THRESH_BINARY)
         else:  # Mixture of Gaussian
             _, threshold = cv2.threshold(MOG_frame, 100, 255, cv2.THRESH_OTSU)
 
@@ -271,8 +277,6 @@ class QtCapture(QtGui.QFrame, video_frame):
         LV_color = (255, 0, 0)
         Hv_color = (0, 0, 255)
         Frame_color = (255, 255, 255)
-        total_LV = 0
-        total_HV = 0
 
         cv2.putText(PrimRGB_frame, "Frame : {0}".format(frame), (800, 20), font, 0.5, Frame_color, 1)
         cv2.putText(PrimRGB_frame, "Light Vehicle  : {0}".format(total_LV), (10, 500), font, size, LV_color, 1)
@@ -342,29 +346,41 @@ class QtCapture(QtGui.QFrame, video_frame):
                 cnt = contours[i]
 
                 xContour, yContour, widthContour, highContour = cv2.boundingRect(cnt)
+                # Point A : (xContour, yContour)
+                # Point B : (xContour + widthContour, yContour)
+                # Point C : (xContour + widthContour, yContour + highContour)
+                # Point D : (xContour, yContour + highContour)
                 xCenteroid = (xContour + (xContour + widthContour)) / 2
                 yCenteroid = (yContour + (yContour + highContour)) / 2
 
                 # -- [x] Pin Hole Model -------------------------#
                 # IS    :
                 # FS    :
-                fov_w = self.getFOV()
+                fov = self.getFOV()
                 focal = self.getFocal()
                 theta = self.getElevated()
                 altitude = self.getAlt()
                 maxHighLV = self.getHighLV()
                 maxHighHV = self.getHighHV()
                 maxLengthLV = self.getLengthLV()
+                maxLengthHV = self.getLengthHV()
+                maxWidthHV = self.getWidthHV()
 
                 x1Vehicle = (yContour + highContour)
                 x2Vehicle = yContour
 
-                if focal == 0:
-                    focal = mo.getFocalfromFOV(width_frame, fov_w)
-                    fov_h = math.degrees(math.atan((height_frame / 2) / focal))
+                if self.getFocal() == 0:
+                    horizontalFOV, verticalFOV = mo.transformDiagonalFOV(fov)
+                    focal = mo.getFocalfromFOV(height_frame, horizontalFOV)
 
                 lengthVehicle = mo.vertikalPinHoleModel(height_frame, focal, altitude, theta, x1Vehicle, x2Vehicle,
                                                         maxHighLV, maxHighHV, maxLengthLV)
+                centerVehicle = mo.centeroidPinHoleMode(height_frame, focal, altitude, theta, yCenteroid)
+
+                if self.getFocal() == 0:
+                    focal = mo.getFocalfromFOV(width_frame, verticalFOV)
+
+                widthVehicle = mo.horizontalPinHoleModel(width_frame, focal, altitude, xContour, (xContour + widthContour), centerVehicle)
 
                 # -- [x] Draw Boundary --------------------------#
                 # IS    :
@@ -373,7 +389,7 @@ class QtCapture(QtGui.QFrame, video_frame):
                 thick = 3
                 size = 2
 
-                if (widthContour >= 100) & (widthContour < 200):
+                if (widthVehicle >= 1) & (widthVehicle < maxWidthHV) & (lengthVehicle >= 1.5) & (lengthVehicle < maxLengthHV):
                     cv2.rectangle(PrimRGB_frame, (xContour + widthContour, yContour + highContour),
                                   (xContour, yContour), color, thick)
                     cv2.line(PrimRGB_frame, (xCenteroid, yCenteroid), (xCenteroid, yCenteroid), (0, 0, 255), thick)
@@ -390,10 +406,17 @@ class QtCapture(QtGui.QFrame, video_frame):
                     # FS    :
                     # LV_count = self.getLabelLV()
                     # HV_count = self.getLabelHV()
+                    stopGap = 10
                     yPredict = mo.funcY_line(registX1, registY1, registX2, registY2, xCenteroid)
                     countClass = improc.initCounting(registX1, registY1, registX2, registX2, xCenteroid, yPredict,
                                                      classification)
 
+                    if (yCenteroid >= yPredict) and (yCenteroid < yPredict + stopGap):
+                        if countClass == "LV":
+                            total_LV += 1
+                        elif countClass == "HV":
+                            total_HV += 1
+                        print "LV: {0} | HV: {1}".format(total_LV, total_HV)
                     # -- [x] Crop Image -------------------------#
                     # IS    :
                     # FS    :
@@ -408,7 +431,7 @@ class QtCapture(QtGui.QFrame, video_frame):
             img = QtGui.QImage(show_frame, show_frame.shape[1], show_frame.shape[0], QtGui.QImage.Format_RGB888)
             # RGB image - Format_RGB888
         else:
-            show_frame = roiBinary_frame
+            show_frame = bin_frame
             img = QtGui.QImage(show_frame, show_frame.shape[1], show_frame.shape[0], QtGui.QImage.Format_Indexed8)
             # Gray scale, binary image - Format_Indexed8
 

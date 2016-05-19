@@ -65,17 +65,19 @@ class MainInit(QMainWindow, main_ui):
 
         # 1.4   Data Input
         # 1.4.1 Camera
+        diagonalFOV = ["90", "127", "160"]
+
         self.setAlt(6)
         self.setElevated(20)
         self.setFps(30)
-        self.setFocal(0)
-        self.setFOV(90)
+        self.setFocal(500)
 
-        self.radioButton_focalLength.setChecked(False)
-        self.radioButton_fieldofview.setChecked(True)
+        self.radioButton_focalLength.setChecked(True)
+        self.radioButton_fieldofview.setChecked(False)
 
-        self.lineEdit_focalCam.setEnabled(False)
-        self.lineEdit_fieldofviewCam.setEnabled(True)
+        self.lineEdit_focalCam.setEnabled(True)
+        self.comboBox_fov.setEnabled(False)
+        self.comboBox_fov.addItems(diagonalFOV)
 
         self.radioButton_focalLength.toggled.connect(self.radioChooseFocal)
 
@@ -105,7 +107,6 @@ class MainInit(QMainWindow, main_ui):
         self.pushButton_showLog.clicked.connect(self.showLog)
 
         # 2.2   Capture
-        # self.tableView_Capture()
 
         # 3.    Log
         # 3.1   Search
@@ -149,10 +150,10 @@ class MainInit(QMainWindow, main_ui):
         return self.lineEdit_focalCam.text()
 
     def setFOV(self, value):
-        self.lineEdit_fieldofviewCam.setText(format(value))
+        self.comboBox_fov.currentText(format(value))
 
     def getFOV(self):
-        return self.lineEdit_fieldofviewCam.text()
+        return self.comboBox_fov.currentText()
 
     def setLengthLV(self, value):
         self.lineEdit_pLV.setText(format(value))
@@ -364,15 +365,11 @@ class MainInit(QMainWindow, main_ui):
 
     def radioChooseFocal(self, enabled):
         if enabled:
-            self.lineEdit_fieldofviewCam.setEnabled(False)
+            self.comboBox_fov.setEnabled(False)
             self.lineEdit_focalCam.setEnabled(True)
-            self.lineEdit_focalCam.setText(format(160))
-            self.lineEdit_fieldofviewCam.setText(format(0))
         else:
-            self.lineEdit_fieldofviewCam.setEnabled(True)
+            self.comboBox_fov.setEnabled(True)
             self.lineEdit_focalCam.setEnabled(False)
-            self.lineEdit_focalCam.setText(format(0))
-            self.lineEdit_fieldofviewCam.setText(format(90))
 
     def setSetting(self):
         # Get video mode
@@ -387,8 +384,12 @@ class MainInit(QMainWindow, main_ui):
         alt = float(self.getAlt())
         elevated = float(self.getElevated())
         fps = float(self.getFps())
-        focal = float(self.getFocal())
-        fov = float(self.getFOV())
+        if self.radioButton_focalLength.isChecked():
+            focal = float(self.getFocal())
+            fov = 0
+        else:
+            fov = float(self.getFOV())
+            focal = 0
 
         # Light vehicle dimension
         length_LV = float(self.getLengthLV())

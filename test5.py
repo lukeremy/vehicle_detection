@@ -36,7 +36,7 @@ subtractionLAB = cv2.absdiff(afore, aback)
 comHSVRGB = cv2.bitwise_or(subtractionLAB, subtracRGB)
 comALL = cv2.bitwise_or(subtraction, subtractionLAB)
 # Threshold
-_,thresholdRGB = cv2.threshold(comHSVRGB, 100,255,cv2.THRESH_OTSU)
+_,thresholdRGB = cv2.threshold(comHSVRGB, 50,255,cv2.THRESH_BINARY)
 _,threshold = cv2.threshold(comALL, 100,255,cv2.THRESH_OTSU)
 
 im_floodfill = thresholdRGB.copy()
@@ -61,19 +61,19 @@ cv2.fillPoly(img_zero,[pts],(255,255,0))
 # Morphology
 kernel = np.ones((3,3),np.uint8)
 kernel1 = np.array([
-    [0, 1, 0],
-    [1, 1, 1],
-    [0, 1, 0]], dtype=np.uint8)
+    [0, 0, 0, 0],
+    [0, 1, 1, 0],
+    [0, 1, 1, 0],
+    [0, 0, 0, 0]], dtype=np.uint8)
 kernel2 = np.array([
-    [0, 1, 0],
     [1, 1, 1],
-    [0, 1, 0]], dtype=np.uint8)
+    [1, 1, 1],
+    [1, 1, 1]], dtype=np.uint8)
 
-morp_erosi1 = cv2.erode(im_floodfill,kernel1,iterations=1)
-morp_erosi1 = cv2.erode(morp_erosi1,kernel2,iterations=1)
+morp_erosi1 = cv2.erode(im_floodfill,None,iterations=1)
 morp_dilasi1 = cv2.dilate(morp_erosi1, kernel, iterations=1)
-morp_erosi2 = cv2.erode(morp_dilasi1,kernel,iterations=1)
-morp_dilasi2 = cv2.dilate(morp_erosi2, kernel, iterations=1)
+#morp_erosi2 = cv2.erode(morp_dilasi1,kernel,iterations=1)
+morp_dilasi2 = cv2.dilate(morp_dilasi1, kernel, iterations=1)
 morp_dilasi3 = cv2.dilate(morp_dilasi2, kernel, iterations=1)
 morp_dilasi4 = cv2.dilate(morp_dilasi3, kernel, iterations=1)
 
@@ -120,8 +120,8 @@ crop = img_fore[y:y+h, x:x+w]
 #x,y,w,h = cv2.boundingRect(contours)
 #cv2.rectangle(img_fore,(x,y),(x+w,y+h),(0,255,0),2)
 
-cv2.imshow("edge", im_floodfill)
-cv2.imshow("binary", im_floodfillHSV)
+cv2.imshow("edge", img_fore)
+cv2.imshow("binary", morp_erosi1)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 

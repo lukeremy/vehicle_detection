@@ -51,9 +51,4 @@ def backgroundSubtractionAverage(frame_ori, avg, alpha):
     cvtScaleAbs = cv2.convertScaleAbs(accuWeight)
     return cvtScaleAbs
 
-def backgroundSubtractionMoG(frame):
-    initMOG2 = cv2.createBackgroundSubtractorMOG2()
-    MOG2_frame = initMOG2.apply(frame)
-    return MOG2_frame
-
 

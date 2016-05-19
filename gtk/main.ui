@@ -459,31 +459,6 @@
          <string>Field of view </string>
         </property>
        </widget>
-       <widget class="QLineEdit" name="lineEdit_fieldofviewCam">
-        <property name="geometry">
-         <rect>
-          <x>220</x>
-          <y>124</y>
-          <width>91</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="layoutDirection">
-         <enum>Qt::LeftToRight</enum>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="maxLength">
-         <number>3</number>
-        </property>
-        <property name="frame">
-         <bool>true</bool>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
        <widget class="QLabel" name="label_fov">
         <property name="geometry">
          <rect>
@@ -495,6 +470,16 @@
         </property>
         <property name="text">
          <string>degree</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="comboBox_fov">
+        <property name="geometry">
+         <rect>
+          <x>260</x>
+          <y>123</y>
+          <width>51</width>
+          <height>21</height>
+         </rect>
         </property>
        </widget>
       </widget>
