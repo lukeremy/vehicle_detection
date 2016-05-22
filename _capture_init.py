@@ -4,6 +4,7 @@ import image_processing as improc
 import math_operation as mo
 import _main_init as mi
 import time
+import datetime
 import math
 
 from PyQt4 import QtGui, QtCore
@@ -14,6 +15,7 @@ ocl.setUseOpenCL(False)  # set flag OCL to False if you build OPENCV -D WITH_OPE
 
 # Global variable
 video_frame = uic.loadUiType("gtk/video_frame.ui")[0]
+
 # init variable
 start_time = None
 width_frame = 960  # pixel
@@ -41,10 +43,10 @@ class QtCapture(QtGui.QFrame, video_frame):
         return self.backgroundSubtracion
 
     def setBoundary(self, boundary):
-        self.boudary = boundary
+        self.boundary = boundary
 
     def getBoundary(self):
-        return self.boudary
+        return self.boundary
 
     def setROI(self, roi):
         self.roi = roi
@@ -150,11 +152,8 @@ class QtCapture(QtGui.QFrame, video_frame):
         PrimImg_frame = cv2.resize(PrimImg_frame, (width_frame, height_frame))
         avg = np.float32(PrimImg_frame)
 
-    def initSetting(self):
-        print "load Setting"
-
     def start(self):
-        global start_time, label_fps
+        global start_time
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.nextFrame)
         self.timer.start(1000. / self.getFPS())
@@ -166,8 +165,10 @@ class QtCapture(QtGui.QFrame, video_frame):
         self.timer.stop()
 
     def deleteLater(self):
-        global frame
+        global frame, total_HV, total_LV
         frame = 0
+        total_HV = 0
+        total_LV = 0
 
         self.cap.release()
         super(QtGui.QFrame, self).deleteLater()
@@ -238,17 +239,16 @@ class QtCapture(QtGui.QFrame, video_frame):
             combineRGBHSV = cv2.bitwise_or(ImgDiffRGB, ImgDiffHSV)
             combineLABHSV = cv2.bitwise_or(ImgDiffLAB, ImgDiffHSV)
 
-        # -- [x] Smoothing and Noise Reduction --------------------#
-        # IS    :
-        # FS    :
-        blurLevel = 35
-        gaussianBlur_frame = cv2.GaussianBlur(combineLABHSV, (blurLevel, blurLevel), 0)
+            # -- [x] Smoothing and Noise Reduction --------------------#
+            # IS    :
+            # FS    :
+            blurLevel = 35
+            gaussianBlur_frame = cv2.GaussianBlur(combineLABHSV, (blurLevel, blurLevel), 0)
 
-        # -- [x] Thresholds to Binary ----------------------------#
-        # IS    :
-        # FS    :
-        thresholdLevel = 20
-        if self.getBackgroundSubtraction() == 'MA':  # Moving Averages
+            # -- [x] Thresholds to Binary ----------------------------#
+            # IS    :
+            # FS    :
+            thresholdLevel = 20
             # _, threshold = cv2.threshold(combineLABHSV, 100, 255, cv2.THRESH_OTSU)
             _, threshold = cv2.threshold(gaussianBlur_frame, thresholdLevel, 255, cv2.THRESH_BINARY)
         else:  # Mixture of Gaussian
@@ -330,100 +330,122 @@ class QtCapture(QtGui.QFrame, video_frame):
         maskRGBandBin_frame = cv2.bitwise_and(PrimRGB_frame, ThreeChanelBinary_frame)
         Canny_EdgeDetection = cv2.Canny(maskRGBandBin_frame, 100, 150)
 
-        # -- [x] Shadow Detection and Removal -------------------#
-        # IS    : ~
-        # FS    : ~
-
         # -- [x] Contour Detection ------------------------------#
         # IS    :
         # FS    :
 
-        if self.getBoundary():
-            image, contours, hierarchy = cv2.findContours(roiBinary_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-            contoursList = len(contours)
+        image, contours, hierarchy = cv2.findContours(roiBinary_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        contoursList = len(contours)
 
-            for i in range(0, contoursList):
-                cnt = contours[i]
+        for i in range(0, contoursList):
+            cnt = contours[i]
+            areaContours = cv2.contourArea(cnt)
+            xContour, yContour, widthContour, highContour = cv2.boundingRect(cnt)
+            # Point A : (xContour, yContour)
+            # Point B : (xContour + widthContour, yContour)
+            # Point C : (xContour + widthContour, yContour + highContour)
+            # Point D : (xContour, yContour + highContour)
+            xCenteroid = xContour + (widthContour / 3)
+            yCenteroid = yContour + (highContour / 2)
+            areaBoundary = widthContour * highContour
 
-                xContour, yContour, widthContour, highContour = cv2.boundingRect(cnt)
-                # Point A : (xContour, yContour)
-                # Point B : (xContour + widthContour, yContour)
-                # Point C : (xContour + widthContour, yContour + highContour)
-                # Point D : (xContour, yContour + highContour)
-                xCenteroid = (xContour + (xContour + widthContour)) / 2
-                yCenteroid = (yContour + (yContour + highContour)) / 2
+            # -- [x] Pin Hole Model -------------------------#
+            # IS    :
+            # FS    :
+            fov = self.getFOV()
+            focal = self.getFocal() * 3.779527559055
+            theta = self.getElevated()
+            altitude = self.getAlt()
+            maxHighLV = self.getHighLV()
+            maxHighHV = self.getHighHV()
+            maxLengthLV = self.getLengthLV()
+            maxLengthHV = self.getLengthHV()
+            maxWidthHV = self.getWidthHV()
 
-                # -- [x] Pin Hole Model -------------------------#
-                # IS    :
-                # FS    :
-                fov = self.getFOV()
-                focal = self.getFocal()
-                theta = self.getElevated()
-                altitude = self.getAlt()
-                maxHighLV = self.getHighLV()
-                maxHighHV = self.getHighHV()
-                maxLengthLV = self.getLengthLV()
-                maxLengthHV = self.getLengthHV()
-                maxWidthHV = self.getWidthHV()
+            x1Vehicle = (yContour + highContour)
+            x2Vehicle = yContour
 
-                x1Vehicle = (yContour + highContour)
-                x2Vehicle = yContour
+            if self.getFocal() == 0.0:
+                horizontalFOV, verticalFOV = mo.transformDiagonalFOV(fov)
+                focal = mo.getFocalfromFOV(height_frame, verticalFOV)
 
-                if self.getFocal() == 0:
-                    horizontalFOV, verticalFOV = mo.transformDiagonalFOV(fov)
-                    focal = mo.getFocalfromFOV(height_frame, horizontalFOV)
+            lengthVehicle = mo.vertikalPinHoleModel(height_frame, focal, altitude, theta, x1Vehicle, x2Vehicle,
+                                                    maxHighLV, maxHighHV, maxLengthLV)
+            centerVehicle = mo.centeroidPinHoleMode(height_frame, focal, altitude, theta, (yContour + highContour))
 
-                lengthVehicle = mo.vertikalPinHoleModel(height_frame, focal, altitude, theta, x1Vehicle, x2Vehicle,
-                                                        maxHighLV, maxHighHV, maxLengthLV)
-                centerVehicle = mo.centeroidPinHoleMode(height_frame, focal, altitude, theta, yCenteroid)
+            if self.getFocal() == 0.0:
+                focal = mo.getFocalfromFOV(width_frame, horizontalFOV)
 
-                if self.getFocal() == 0:
-                    focal = mo.getFocalfromFOV(width_frame, verticalFOV)
+            widthVehicle = mo.horizontalPinHoleModel(width_frame, focal, altitude, xContour, (xContour + widthContour), centerVehicle)
 
-                widthVehicle = mo.horizontalPinHoleModel(width_frame, focal, altitude, xContour, (xContour + widthContour), centerVehicle)
+            # -- [x] Vehicle Classification -------------#
+            # IS    :
+            # FS    :
+            if lengthVehicle <= maxLengthLV:
+                classification = "LV"
+            else:
+                classification = "HV"
 
-                # -- [x] Draw Boundary --------------------------#
-                # IS    :
-                # FS    :
-                color = (0, 255, 0)
-                thick = 3
-                size = 2
+            # -- [x] Draw Boundary --------------------------#
+            # IS    :
+            # FS    :
+            colorLV = (0, 255, 0)
+            colorHV = (0, 0, 255)
+            thick = 3
+            size = 2
+            areaThreshold = 40
 
-                if (widthVehicle >= 1) & (widthVehicle < maxWidthHV) & (lengthVehicle >= 1.5) & (lengthVehicle < maxLengthHV):
+            if (widthVehicle >= 2.0) and (lengthVehicle >= 1.5) and (lengthVehicle < maxLengthHV) and (areaContours >= (float(areaBoundary) * (float(areaThreshold) / 100))):
+                if classification == "LV":
+                    color = colorLV
+                else:
+                    color = colorHV
+
+                if self.getBoundary():
                     cv2.rectangle(PrimRGB_frame, (xContour + widthContour, yContour + highContour),
                                   (xContour, yContour), color, thick)
                     cv2.line(PrimRGB_frame, (xCenteroid, yCenteroid), (xCenteroid, yCenteroid), (0, 0, 255), thick)
                     improc.addText(PrimRGB_frame, lengthVehicle, size, xContour, (yContour - 3))
-                    # -- [x] Vehicle Classification -------------#
-                    # IS    :
-                    # FS    :
-                    if lengthVehicle <= maxLengthLV:
-                        classification = "LV"
-                    else:
-                        classification = "HV"
-                    # -- [x] Counting Detection -----------------#
-                    # IS    :
-                    # FS    :
-                    # LV_count = self.getLabelLV()
-                    # HV_count = self.getLabelHV()
-                    stopGap = 10
-                    yPredict = mo.funcY_line(registX1, registY1, registX2, registY2, xCenteroid)
-                    countClass = improc.initCounting(registX1, registY1, registX2, registX2, xCenteroid, yPredict,
-                                                     classification)
 
-                    if (yCenteroid >= yPredict) and (yCenteroid < yPredict + stopGap):
-                        if countClass == "LV":
-                            total_LV += 1
-                        elif countClass == "HV":
-                            total_HV += 1
-                        print "LV: {0} | HV: {1}".format(total_LV, total_HV)
+                # -- [x] Counting Detection -----------------#
+                # IS    :
+                # FS    :
+                stopGap = 20
+                changeRegistLine_color = (255, 255, 255)
+                changeThick = 4
+
+                yPredict = mo.funcY_line(registX1, registY1, registX2, registY2, xCenteroid)
+                countClass = improc.initCounting(registX1, registY1, registX2, registX2, xCenteroid, yPredict,
+                                                 classification)
+
+                if (yCenteroid >= yPredict) and (yCenteroid < yPredict + stopGap):
+                    if countClass == "LV":
+                        total_LV += 1
+                    elif countClass == "HV":
+                        total_HV += 1
+
+                    cv2.line(PrimRGB_frame, (registX1, registY1), (registX2, registY2), changeRegistLine_color, changeThick)
+                    print "Total LV: {0} | Total HV: {1} | class: {2} length: {3} width: {4}".format(total_LV, total_HV, countClass, lengthVehicle, widthVehicle)
+
                     # -- [x] Crop Image -------------------------#
                     # IS    :
                     # FS    :
+                    now = datetime.datetime.now()
+                    formatDate = now.strftime("%d%m%Y_%H%M%S")
+                    path = "output"
 
-                    #filename = "test{0}.jpg".format(i)
-                    #cropping_frame = PrimRGB_frame[yContour:yContour + highContour, xContour:xContour + widthContour]
-                    #cv2.imwrite(filename, cropping_frame)
+                    if countClass == "LV":
+                        formatFileName = "{0}/{1}_{2:03}_{3}.jpg".format(path, countClass, total_LV, formatDate)
+                        cropping_frame = PrimResize_frame[yContour:yContour + highContour, xContour:xContour + widthContour]
+                        # cv2.imwrite(formatFileName, cropping_frame)
+                    elif countClass == "HV":
+                        formatFileName = "{0}/{1}_{2:03}_{3}.jpg".format(path, countClass, total_HV, formatDate)
+                        cropping_frame = PrimResize_frame[yContour:yContour + highContour, xContour:xContour + widthContour]
+                        # cv2.imwrite(formatFileName, cropping_frame)
+
+                    # -- [x] Save Filename to Text --------------#
+                    # IS    :
+                    # FS    :
 
         # ---------- Do not disturb this source code ----------- #
         if self.getVideoMode() == "RGB":

@@ -531,7 +531,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>P</string>
+         <string>L</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_lebarVehicle">
@@ -544,7 +544,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>L</string>
+         <string>W</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_tinggiVehicle">
@@ -557,7 +557,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>T</string>
+         <string>H</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="lineEdit_lLV">

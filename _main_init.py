@@ -27,7 +27,7 @@ class MainInit(QMainWindow, main_ui):
         port_cam = ["0", "1", "2"]
         # Menu Bar
         # File
-        self.actionOpen_settings.triggered.connect(self.selectConfigFile)
+        self.actionOpen_settings.triggered.connect(self.openConfigFile)
         self.actionSave_settings.triggered.connect(self.saveConfigFile)
         self.actionExit.triggered.connect(self.file_exit)
         # About
@@ -42,8 +42,8 @@ class MainInit(QMainWindow, main_ui):
         self.radioButton_choseDevice.setChecked(True)
         self.radioButton_choseFile.setChecked(False)
 
-        self.radioButton_choseFile.toggled.connect(self.radioChoseFile)
-        self.radioButton_choseDevice.toggled.connect(self.radioChoseDevice)
+        self.radioButton_choseFile.toggled.connect(self.selectFile)
+        self.radioButton_choseDevice.toggled.connect(self.selectDevice)
 
         self.comboBox_choseDevice.setEnabled(True)
         self.comboBox_choseDevice.addItems(port_cam)
@@ -58,6 +58,8 @@ class MainInit(QMainWindow, main_ui):
         self.radioButton_binVM.setChecked(False)
         self.checkBox_showboundaryVM.setChecked(False)
         self.checkBox_showroiVM.setChecked(False)
+
+        self.radioButton_binVM.toggled.connect(self.selectBinary)
 
         # 1.3 Background Subtraction
         self.radioButton_BsMA.setChecked(True)
@@ -78,8 +80,9 @@ class MainInit(QMainWindow, main_ui):
         self.lineEdit_focalCam.setEnabled(True)
         self.comboBox_fov.setEnabled(False)
         self.comboBox_fov.addItems(diagonalFOV)
+        self.comboBox_fov.setCurrentIndex(0)
 
-        self.radioButton_focalLength.toggled.connect(self.radioChooseFocal)
+        self.radioButton_focalLength.toggled.connect(self.selectFocal)
 
         # 1.4.2 Vehicle Input
         # 1.4.2.1 Light Vehicle
@@ -121,8 +124,8 @@ class MainInit(QMainWindow, main_ui):
 
         # 3.2   View Log
         # self.tableView_searchLog()
-        self.setLogCountLV("10")
-        self.setLogCountHV("90")
+        self.setLogCountLV("0")
+        self.setLogCountHV("0")
 
     # Set Variable
     def setAlt(self, value):
@@ -154,6 +157,12 @@ class MainInit(QMainWindow, main_ui):
 
     def getFOV(self):
         return self.comboBox_fov.currentText()
+
+    def setCurrentIndexFOV(self, value):
+        self.comboBox_fov.setCurrentIndex(int(value))
+
+    def getCurrentIndexFOV(self):
+        return self.comboBox_fov.currentIndex()
 
     def setLengthLV(self, value):
         self.lineEdit_pLV.setText(format(value))
@@ -254,23 +263,28 @@ class MainInit(QMainWindow, main_ui):
         pars_content = open(filename, "r")
         return pars_content.read()
 
-    def selectConfigFile(self):
+    def openConfigFile(self):
         filename = QFileDialog.getOpenFileName(self, "Open config file", 'conf', "*.conf", None)
         parsing = self.parsingConfigFile(filename)
         split = parsing.split(" ")
 
-        altitude, elevated, fps, focal, fov = split[0], split[1], split[2], split[3], split[4]
-        length_LV, width_LV, high_LV = split[5], split[6], split[7]
-        length_HV, width_HV, high_HV = split[8], split[9], split[10]
-        detectX1, detectY1, detectX2, detectY2 = split[11], split[12], split[13], split[14]
-        registX1, registY1, registX2, registY2 = split[15], split[16], split[17], split[18]
+        altitude, elevated, fps, focal, fov, index_fov = split[0], split[1], split[2], split[3], split[4], split[5]
+        length_LV, width_LV, high_LV = split[6], split[7], split[8]
+        length_HV, width_HV, high_HV = split[9], split[10], split[11]
+        detectX1, detectY1, detectX2, detectY2 = split[12], split[13], split[14], split[15]
+        registX1, registY1, registX2, registY2 = split[16], split[17], split[18], split[19]
+
+        if focal != "0":
+            self.radioButton_focalLength.setChecked(True)
+        else:
+            self.radioButton_fieldofview.setChecked(True)
 
         # 1.4.1 Camera
         self.setAlt(altitude)
         self.setElevated(elevated)
         self.setFps(fps)
         self.setFocal(focal)
-        self.setFOV(fov)
+        self.setCurrentIndexFOV(index_fov)
 
         # 1.4.2 Vehicle Input
         # 1.4.2.1 Light Vehicle
@@ -296,8 +310,15 @@ class MainInit(QMainWindow, main_ui):
         alt = self.getAlt()
         elevated = self.getElevated()
         fps = self.getFps()
-        focal = self.getFocal()
-        fov = self.getFOV()
+
+        if self.radioButton_focalLength.isChecked():
+            focal = self.getFocal()
+            fov = 0
+        else:
+            fov = self.getFOV()
+            focal = 0
+
+        index_fov = self.getCurrentIndexFOV()
 
         # Light vehicle dimension
         length_LV = self.getLengthLV()
@@ -313,8 +334,8 @@ class MainInit(QMainWindow, main_ui):
         detectX1, detectY1, detectX2, detectY2 = self.getDetectLine()
         registX1, registY1, registX2, registY2 = self.getRegistrationLine()
 
-        saveFile.write("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17} {18}".format(
-            alt, elevated, fps, focal, fov, length_LV, width_LV, high_LV, length_HV, width_HV, high_HV,
+        saveFile.write("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17} {18} {19}".format(
+            alt, elevated, fps, focal, fov, index_fov, length_LV, width_LV, high_LV, length_HV, width_HV, high_HV,
             detectX1, detectY1, detectX2, detectY2, registX1, registY1, registX2, registY2
         ))
         saveFile.flush()
@@ -349,13 +370,23 @@ class MainInit(QMainWindow, main_ui):
         fileLoc = int(select)
         return fileLoc
 
-    def radioChoseFile(self, enabled):
+    def selectFile(self, enabled):
         if enabled:
             self.pushButton_selectFile.setEnabled(True)
         else:
             self.pushButton_selectFile.setEnabled(False)
 
-    def radioChoseDevice(self, enabled):
+    def selectBinary(self, enabled):
+        if enabled:
+            self.checkBox_showboundaryVM.setChecked(False)
+            self.checkBox_showroiVM.setChecked(False)
+            self.checkBox_showboundaryVM.setEnabled(False)
+            self.checkBox_showroiVM.setEnabled(False)
+        else:
+            self.checkBox_showboundaryVM.setEnabled(True)
+            self.checkBox_showroiVM.setEnabled(True)
+
+    def selectDevice(self, enabled):
         global fileLoc
         if enabled:
             self.comboBox_choseDevice.setEnabled(True)
@@ -363,7 +394,7 @@ class MainInit(QMainWindow, main_ui):
         else:
             self.comboBox_choseDevice.setEnabled(False)
 
-    def radioChooseFocal(self, enabled):
+    def selectFocal(self, enabled):
         if enabled:
             self.comboBox_fov.setEnabled(False)
             self.lineEdit_focalCam.setEnabled(True)
@@ -386,10 +417,10 @@ class MainInit(QMainWindow, main_ui):
         fps = float(self.getFps())
         if self.radioButton_focalLength.isChecked():
             focal = float(self.getFocal())
-            fov = 0
+            fov = float(0)
         else:
             fov = float(self.getFOV())
-            focal = 0
+            focal = float(0)
 
         # Light vehicle dimension
         length_LV = float(self.getLengthLV())
@@ -409,7 +440,6 @@ class MainInit(QMainWindow, main_ui):
         print "video input: {0}".format(fileLoc)
         print "video mode: {0}".format(video_mode)
         print "background subtraction: {0}".format(background_subtraction)
-        # print "init time bsMBO: {0}".format(initMBO)
         print "boundary: {0}".format(boundary)
         print "roi: {0}".format(roi)
         print "alt: {0} | elevated: {1} | fps: {2} | focal:{3} | fov: {4}".format(alt, elevated, fps, focal, fov)
@@ -434,7 +464,6 @@ class MainInit(QMainWindow, main_ui):
 
     # Function Tab 2. Video
     def startVideo(self):
-
         # Get video mode
         video_mode = self.getVideoMode()
         boundary = self.getBoundary()
@@ -447,8 +476,12 @@ class MainInit(QMainWindow, main_ui):
         alt = float(self.getAlt())
         elevated = int(self.getElevated())
         fps = float(self.getFps())
-        focal = float(self.getFocal())
-        fov = float(self.getFOV())
+        if self.radioButton_focalLength.isChecked():
+            focal = float(self.getFocal())
+            fov = float(0)
+        else:
+            fov = float(self.getFOV())
+            focal = float(0)
 
         # Light vehicle dimension
         length_LV = float(self.getLengthLV())

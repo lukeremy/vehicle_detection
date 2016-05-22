@@ -90,13 +90,17 @@ def horizontalPinHoleModel(width, focal, altitude, x1, x2, lengthObject):
     Lw1 = math.tan(math.radians(delta1)) * OX
     Lw2 = math.tan(math.radians(delta2)) * OX
 
+    if (x1 <= width / 2) and (x2 >= width / 2):
+        widthObject = round((Lw2 + Lw1), 3)
+    else:
+        widthObject = round(math.fabs(Lw2 - Lw1), 3)
+
     delta1 = round(delta1, 3)
     delta2 = round(delta2, 3)
     lengthObject = round(lengthObject, 2)
     OX = round(OX, 4)
     Lw1 = round(Lw1, 4)
     Lw2 = round(Lw2, 4)
-    widthObject = round(math.fabs(Lw2 - Lw1), 3)
 
     # print "delta1: {0} | delta2: {1} | Length: {2} | OX: {3} | Lw1: {4} | Lw2: {5} | widthObject: {6}".format(delta1, delta2, lengthObject, OX, Lw1, Lw2, widthObject)
     return widthObject
@@ -135,17 +139,17 @@ def funcX_line(x1, y1, x2, y2, Y):
 
 def getFocalfromFOV(width, fov):
     focal = (width / 2) / math.tan(math.radians(fov / 2))
-    focal *= 3.779527559055
+    # focal *= 3.779527559055
     return focal
 
 def transformDiagonalFOV(fov):
-    if fov == "90":
+    if fov == 90.0:
         horizontalFOV = 78.4
         verticalFOV = 44.1
-    elif fov == "127":
+    elif fov == 127.0:
         horizontalFOV = 113.3
         verticalFOV = 63.7
-    elif fov == "160":
+    elif fov == 160.0:
         horizontalFOV = 139.5
         verticalFOV = 78.4
     return horizontalFOV, verticalFOV
