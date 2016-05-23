@@ -77,7 +77,6 @@ morp_dilasi2 = cv2.dilate(morp_dilasi1, kernel, iterations=1)
 morp_dilasi3 = cv2.dilate(morp_dilasi2, kernel, iterations=1)
 morp_dilasi4 = cv2.dilate(morp_dilasi3, kernel, iterations=1)
 
-cv2.imshow("binary", morp_dilasi4)
 combine = cv2.bitwise_and(img_zero,im_floodfill)
 bit_and = cv2.bitwise_not(combine,gray_foreground)
 
@@ -94,12 +93,12 @@ cnt = contours[i]
 M = cv2.moments(cnt)
 area = cv2.contourArea(cnt)
 
-print M
+#print M
 cx = int(M['m10']/M['m00'])
 cy = int(M['m01']/M['m00'])
 
-print cx
-print cy
+#print cx
+#print cy
 
 area = cv2.contourArea(cnt)
 #areas = [cv2.contourArea(c) for c in contours]
@@ -111,19 +110,19 @@ font = cv2.FONT_HERSHEY_PLAIN
 cv2.putText(img_fore, "{0}".format(i+1), (x+2, y-4), font, 1, (255, 255, 0), 2)
 
 cv2.rectangle(img_fore,(x,y),(x+w,y+h),(255,255,0),2)
-print y
-print x+w
-print y+h
+#print y
+#print x+w
+#print y+h
 crop = img_fore[y:y+h, x:x+w]
-print area
-print w * h
+#print area
+#print w * h
 
-
+print gray_background
 #print M
 #x,y,w,h = cv2.boundingRect(contours)
 #cv2.rectangle(img_fore,(x,y),(x+w,y+h),(0,255,0),2)
 
-cv2.imshow("edge", img_fore)
+#cv2.imshow("edge", img_fore)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 

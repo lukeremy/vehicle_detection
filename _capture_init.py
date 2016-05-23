@@ -2,10 +2,9 @@ import cv2
 import numpy as np
 import image_processing as improc
 import math_operation as mo
-import _main_init as mi
 import time
 import datetime
-import math
+import os
 
 from PyQt4 import QtGui, QtCore
 from PyQt4 import uic
@@ -146,6 +145,13 @@ class QtCapture(QtGui.QFrame, video_frame):
         # Start Capture Video
         self.cap = cv2.VideoCapture(filename)
 
+        # Initiation file
+        now = datetime.datetime.now()
+        formatDate = now.strftime("%d-%m-%Y %H-%M")
+        self.file = open("output/{0}.csv".format(formatDate), "a")
+        if os.stat("output/{0}.csv".format(formatDate)).st_size == 0:
+            self.file.write("No,Waktu,Jenis Kendaraan,Panjang,Lebar, Gambar\n")
+
         # Initiation to moving average
         _, PrimImg_frame = self.cap.read()
         PrimImg_frame = improc.cvtBGR2RGB(PrimImg_frame)
@@ -167,10 +173,23 @@ class QtCapture(QtGui.QFrame, video_frame):
     def deleteLater(self):
         global frame, total_HV, total_LV
         frame = 0
+        # Stop capture
+        self.cap.release()
+
+        # Close opening file
+        self.file.write("FOV:" + "," + str(self.getFOV()) + "\n" +
+                        "Focal:" + "," + str(self.getFocal()) + "\n" +
+                        "Angle:" + "," + str(self.getElevated()) + "\n" +
+                        "Altitude:" + "," + str(self.getAlt()) + "\n" +
+                        "Total LV:" + "," + str(total_LV) + "\n" +
+                        "Total HV:" + "," + str(total_HV) + "\n" +
+                        "Total Vehicle:" + "," + str(total_HV + total_LV) + "\n")
+        self.file.flush()
+        self.file.close()
+
         total_HV = 0
         total_LV = 0
 
-        self.cap.release()
         super(QtGui.QFrame, self).deleteLater()
 
     def nextFrame(self):
@@ -200,10 +219,8 @@ class QtCapture(QtGui.QFrame, video_frame):
                 else:
                     mask_frame = movingAverage_frame
                     mask_status = True
-                    #print "mask found"
             else:
                 subtract_frame = mask_frame
-                #print "get background"
 
         else:  # If choose Mixture of Gaussian
             # Mixture of Gaussian Model Background Subtraction
@@ -243,13 +260,13 @@ class QtCapture(QtGui.QFrame, video_frame):
             # IS    :
             # FS    :
             blurLevel = 35
-            gaussianBlur_frame = cv2.GaussianBlur(combineLABHSV, (blurLevel, blurLevel), 0)
+            gaussianBlur_frame = cv2.GaussianBlur(combineRGBHSV, (blurLevel, blurLevel), 0)
 
             # -- [x] Thresholds to Binary ----------------------------#
             # IS    :
             # FS    :
-            thresholdLevel = 20
-            # _, threshold = cv2.threshold(combineLABHSV, 100, 255, cv2.THRESH_OTSU)
+            thresholdLevel = 30
+            #_, threshold = cv2.threshold(combineRGBHSV, thresholdLevel, 255, cv2.THRESH_OTSU)
             _, threshold = cv2.threshold(gaussianBlur_frame, thresholdLevel, 255, cv2.THRESH_BINARY)
         else:  # Mixture of Gaussian
             _, threshold = cv2.threshold(MOG_frame, 100, 255, cv2.THRESH_OTSU)
@@ -308,6 +325,7 @@ class QtCapture(QtGui.QFrame, video_frame):
         # IS    : ~
         # FS    : ~
         color = (255, 255, 0)
+        roiThreshold = 10
 
         ImgZero_frame = np.zeros((height_frame, width_frame), np.uint8)
         x1ROI = mo.funcX_line(detectX1, detectY1, registX1, registY1, 0)
@@ -316,8 +334,8 @@ class QtCapture(QtGui.QFrame, video_frame):
         x4ROI = mo.funcX_line(detectX2, detectY2, registX2, registY2, height_frame)
 
         pts = np.array([
-            [x1ROI - 10, 0], [x2ROI + 10, 0],
-            [x4ROI + 10, height_frame], [x3ROI - 10, height_frame]])
+            [x1ROI - roiThreshold, 0], [x2ROI + roiThreshold, 0],
+            [x4ROI + roiThreshold, height_frame], [x3ROI - roiThreshold, height_frame]])
 
         cv2.fillPoly(ImgZero_frame, [pts], color)
 
@@ -418,7 +436,7 @@ class QtCapture(QtGui.QFrame, video_frame):
                 countClass = improc.initCounting(registX1, registY1, registX2, registX2, xCenteroid, yPredict,
                                                  classification)
 
-                if (yCenteroid >= yPredict) and (yCenteroid < yPredict + stopGap):
+                if (yCenteroid >= yPredict) and (yCenteroid < yPredict + stopGap) and (xCenteroid >= registX1) and (xCenteroid <= registX2):
                     if countClass == "LV":
                         total_LV += 1
                     elif countClass == "HV":
@@ -432,20 +450,24 @@ class QtCapture(QtGui.QFrame, video_frame):
                     # FS    :
                     now = datetime.datetime.now()
                     formatDate = now.strftime("%d%m%Y_%H%M%S")
+                    formatFolder = now.strftime("%d-%m-%Y %H-%M")
                     path = "output"
 
-                    if countClass == "LV":
-                        formatFileName = "{0}/{1}_{2:03}_{3}.jpg".format(path, countClass, total_LV, formatDate)
-                        cropping_frame = PrimResize_frame[yContour:yContour + highContour, xContour:xContour + widthContour]
-                        # cv2.imwrite(formatFileName, cropping_frame)
-                    elif countClass == "HV":
-                        formatFileName = "{0}/{1}_{2:03}_{3}.jpg".format(path, countClass, total_HV, formatDate)
-                        cropping_frame = PrimResize_frame[yContour:yContour + highContour, xContour:xContour + widthContour]
-                        # cv2.imwrite(formatFileName, cropping_frame)
+                    formatFileName = "{0}/{1}_{2:03}_{3}.jpg".format(path, countClass, (total_LV + total_HV), formatDate)
+                    cropping_frame = PrimResize_frame[yContour:yContour + highContour, xContour:xContour + widthContour]
+                    cv2.imwrite(formatFileName, cropping_frame)
 
                     # -- [x] Save Filename to Text --------------#
                     # IS    :
                     # FS    :
+                    formatDate = now.strftime("%d:%m:%Y %H:%M:%S")
+                    self.file.write(str(total_LV + total_HV) + "," +
+                                    str(formatDate) + "," +
+                                    str(countClass) + "," +
+                                    str(lengthVehicle) + "," +
+                                    str(widthVehicle) + "," +
+                                    str(formatFileName) + "\n")
+                    self.file.flush()
 
         # ---------- Do not disturb this source code ----------- #
         if self.getVideoMode() == "RGB":
