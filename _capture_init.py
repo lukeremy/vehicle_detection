@@ -152,6 +152,12 @@ class QtCapture(QtGui.QFrame, video_frame):
         if os.stat("output/{0}.csv".format(formatDate)).st_size == 0:
             self.file.write("No,Waktu,Jenis Kendaraan,Panjang,Lebar, Gambar\n")
 
+        # Initiation folder
+        path = "output"
+        self.formatFolder = now.strftime("{0}/%d-%m-%Y %H-%M").format(path)
+        if not os.path.isdir(self.formatFolder):
+            os.makedirs(self.formatFolder)
+
         # Initiation to moving average
         _, PrimImg_frame = self.cap.read()
         PrimImg_frame = improc.cvtBGR2RGB(PrimImg_frame)
@@ -259,7 +265,7 @@ class QtCapture(QtGui.QFrame, video_frame):
             # -- [x] Smoothing and Noise Reduction --------------------#
             # IS    :
             # FS    :
-            blurLevel = 35
+            blurLevel = 21
             gaussianBlur_frame = cv2.GaussianBlur(combineRGBHSV, (blurLevel, blurLevel), 0)
 
             # -- [x] Thresholds to Binary ----------------------------#
@@ -363,8 +369,6 @@ class QtCapture(QtGui.QFrame, video_frame):
             # Point B : (xContour + widthContour, yContour)
             # Point C : (xContour + widthContour, yContour + highContour)
             # Point D : (xContour, yContour + highContour)
-            xCenteroid = xContour + (widthContour / 3)
-            yCenteroid = yContour + (highContour / 2)
             areaBoundary = widthContour * highContour
 
             # -- [x] Pin Hole Model -------------------------#
@@ -413,7 +417,14 @@ class QtCapture(QtGui.QFrame, video_frame):
             size = 2
             areaThreshold = 40
 
-            if (widthVehicle >= 2.0) and (lengthVehicle >= 1.5) and (lengthVehicle < maxLengthHV) and (areaContours >= (float(areaBoundary) * (float(areaThreshold) / 100))):
+            if (widthVehicle >= 2.0) and (widthVehicle <= 10.0) and \
+                    (lengthVehicle >= 1.5) and (lengthVehicle < maxLengthHV) and \
+                    (areaContours >= (float(areaBoundary) * (float(areaThreshold) / 100))):
+                # Get moment for centroid
+                Moment = cv2.moments(cnt)
+                xCentroid = int(Moment['m10'] / Moment['m00'])
+                yCentroid = int(Moment['m01'] / Moment['m00'])
+
                 if classification == "LV":
                     color = colorLV
                 else:
@@ -422,7 +433,7 @@ class QtCapture(QtGui.QFrame, video_frame):
                 if self.getBoundary():
                     cv2.rectangle(PrimRGB_frame, (xContour + widthContour, yContour + highContour),
                                   (xContour, yContour), color, thick)
-                    cv2.line(PrimRGB_frame, (xCenteroid, yCenteroid), (xCenteroid, yCenteroid), (0, 0, 255), thick)
+                    cv2.circle(PrimRGB_frame, (xCentroid, yCentroid), size, (0, 0, 255), thick)
                     improc.addText(PrimRGB_frame, lengthVehicle, size, xContour, (yContour - 3))
 
                 # -- [x] Counting Detection -----------------#
@@ -432,11 +443,11 @@ class QtCapture(QtGui.QFrame, video_frame):
                 changeRegistLine_color = (255, 255, 255)
                 changeThick = 4
 
-                yPredict = mo.funcY_line(registX1, registY1, registX2, registY2, xCenteroid)
-                countClass = improc.initCounting(registX1, registY1, registX2, registX2, xCenteroid, yPredict,
+                yPredict = mo.funcY_line(registX1, registY1, registX2, registY2, xCentroid)
+                countClass = improc.initCounting(registX1, registY1, registX2, registX2, xCentroid, yPredict,
                                                  classification)
 
-                if (yCenteroid >= yPredict) and (yCenteroid < yPredict + stopGap) and (xCenteroid >= registX1) and (xCenteroid <= registX2):
+                if (yCentroid >= yPredict) and (yCentroid < yPredict + stopGap) and (xCentroid >= registX1) and (xCentroid <= registX2):
                     if countClass == "LV":
                         total_LV += 1
                     elif countClass == "HV":
@@ -450,10 +461,8 @@ class QtCapture(QtGui.QFrame, video_frame):
                     # FS    :
                     now = datetime.datetime.now()
                     formatDate = now.strftime("%d%m%Y_%H%M%S")
-                    formatFolder = now.strftime("%d-%m-%Y %H-%M")
-                    path = "output"
 
-                    formatFileName = "{0}/{1}_{2:03}_{3}.jpg".format(path, countClass, (total_LV + total_HV), formatDate)
+                    formatFileName = "{0}/{1}_{2:03}_{3}.jpg".format(self.formatFolder, countClass, (total_LV + total_HV), formatDate)
                     cropping_frame = PrimResize_frame[yContour:yContour + highContour, xContour:xContour + widthContour]
                     cv2.imwrite(formatFileName, cropping_frame)
 

@@ -89,7 +89,7 @@ edge_canny = cv2.Canny(mask, 240,255)
 im2, contours, hierarchy = cv2.findContours(morp_dilasi4, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 #draw = cv2.drawContours(img_fore, contours, -1, (0,255,0), 3)
 i = 0
-cnt = contours[i]
+cnt = contours[2]
 M = cv2.moments(cnt)
 area = cv2.contourArea(cnt)
 
@@ -116,13 +116,11 @@ cv2.rectangle(img_fore,(x,y),(x+w,y+h),(255,255,0),2)
 crop = img_fore[y:y+h, x:x+w]
 #print area
 #print w * h
-
-print gray_background
 #print M
 #x,y,w,h = cv2.boundingRect(contours)
 #cv2.rectangle(img_fore,(x,y),(x+w,y+h),(0,255,0),2)
-
-#cv2.imshow("edge", img_fore)
+cv2.circle(img_fore,(cx,cy),5,255,-1)
+cv2.imshow("edge", img_fore)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
