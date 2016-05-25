@@ -498,11 +498,10 @@ class MainInit(QMainWindow, main_ui):
         registX1, registY1, registX2, registY2 = self.getRegistrationLine()
 
         self.tabWidget.setTabEnabled(0, False)
-
-        time.sleep(1)
-
         self.tabWidget.setTabEnabled(1, True)
         self.tabWidget.setCurrentIndex(1)
+
+        time.sleep(1)
 
         if not self.capture:
             self.capture = cap_init.QtCapture(fileLoc)

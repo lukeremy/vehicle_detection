@@ -150,7 +150,7 @@ class QtCapture(QtGui.QFrame, video_frame):
         formatDate = now.strftime("%d-%m-%Y %H-%M")
         self.file = open("output/{0}.csv".format(formatDate), "a")
         if os.stat("output/{0}.csv".format(formatDate)).st_size == 0:
-            self.file.write("No,Waktu,Jenis Kendaraan,Panjang,Lebar, Gambar\n")
+            self.file.write("No,Waktu,Jenis Kendaraan,Panjang,Lebar,Gambar\n")
 
         # Initiation folder
         path = "output"
@@ -417,7 +417,7 @@ class QtCapture(QtGui.QFrame, video_frame):
             size = 2
             areaThreshold = 40
 
-            if (widthVehicle >= 2.0) and (widthVehicle <= 10.0) and \
+            if (widthVehicle >= 1.5) and (widthVehicle <= 10.0) and \
                     (lengthVehicle >= 1.5) and (lengthVehicle < maxLengthHV) and \
                     (areaContours >= (float(areaBoundary) * (float(areaThreshold) / 100))):
                 # Get moment for centroid
@@ -434,7 +434,11 @@ class QtCapture(QtGui.QFrame, video_frame):
                     cv2.rectangle(PrimRGB_frame, (xContour + widthContour, yContour + highContour),
                                   (xContour, yContour), color, thick)
                     cv2.circle(PrimRGB_frame, (xCentroid, yCentroid), size, (0, 0, 255), thick)
-                    improc.addText(PrimRGB_frame, lengthVehicle, size, xContour, (yContour - 3))
+                    improc.addText(bin_frame, lengthVehicle, size, xContour, (yContour - 3))
+
+                # -- [x] Tracking Vehicle -------------------#
+                # IS    :
+                # FS    :
 
                 # -- [x] Counting Detection -----------------#
                 # IS    :
@@ -453,7 +457,7 @@ class QtCapture(QtGui.QFrame, video_frame):
                     elif countClass == "HV":
                         total_HV += 1
 
-                    cv2.line(PrimRGB_frame, (registX1, registY1), (registX2, registY2), changeRegistLine_color, changeThick)
+                    cv2.line(bin_frame, (registX1, registY1), (registX2, registY2), changeRegistLine_color, changeThick)
                     print "Total LV: {0} | Total HV: {1} | class: {2} length: {3} width: {4}".format(total_LV, total_HV, countClass, lengthVehicle, widthVehicle)
 
                     # -- [x] Crop Image -------------------------#

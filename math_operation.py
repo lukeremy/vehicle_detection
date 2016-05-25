@@ -10,17 +10,17 @@ def centeroidPinHoleMode(height, focal, altitude, theta, yCoordinate):
     delta = math.degrees(math.atan(math.fabs(yCoordinate - (height / 2)) / focal))
 
     if yCoordinate >= height / 2:
-        Lcenteroid = altitude * math.tan(math.radians(theta + delta))
+        lCentroid = altitude * math.tan(math.radians(theta + delta))
     else:
-        Lcenteroid = altitude * math.tan(math.radians(theta - delta))
+        lCentroid = altitude * math.tan(math.radians(theta - delta))
 
-    Lcenteroid = round(Lcenteroid, 4)
+    lCentroid = round(lCentroid, 4)
 
     if (theta + delta) > 90.0:
         Lcenteroid = "unknown length"
 
-    # print "delta: {0} | Lcenteroid: {1}".format(delta, Lcenteroid)
-    return Lcenteroid
+    # print "delta: {0} | lCentroid: {1}".format(delta, lCentroid)
+    return lCentroid
 
 def vertikalPinHoleModel(height, focal, altitude, theta, y1, y2, maxHighLV, maxHighHV, maxLengthLV):
     # height : jumlah baris (piksel)
@@ -151,4 +151,19 @@ def transformDiagonalFOV(fov):
     elif fov == 160.0:
         horizontalFOV = 139.5
         verticalFOV = 78.4
+    else:
+        horizontalFOV, verticalFOV = fov
+
     return horizontalFOV, verticalFOV
+
+def distancetwoPoint(x1, y1, x2, y2):
+    x1 = float(x1)
+    y1 = float(y1)
+    x2 = float(x2)
+    y2 = float(y2)
+
+    distance = math.sqrt((math.pow(math.fabs(x1 - x2), 2) + (math.pow(math.fabs(y1 - y2), 2))))
+    distance = round(distance, 4)
+
+    return distance
+
