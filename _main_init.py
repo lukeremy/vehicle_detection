@@ -535,10 +535,9 @@ class MainInit(QMainWindow, main_ui):
         self.capture.start()
         self.capture.show()
 
-    def pauseVideo(self):
-        self.videoPlayer.pause()
-
     def stopVideo(self):
+        self.capture.stop()
+        time.sleep(0.1)
         self.capture.deleteLater()
         self.capture = None
 

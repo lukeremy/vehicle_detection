@@ -1,6 +1,11 @@
 import cv2
 import numpy as np
+import _vehicle_init as vehicleInit
+import math_operation as mo
+from munkres import Munkres
 
+listVehicleDetected = []
+templist = []
 file_mask = "samples/background2.jpg"
 file_foreground = "samples/frameori2.jpg"
 file_mog = "samples/test_mog.jpg"
@@ -88,38 +93,57 @@ edge_canny = cv2.Canny(mask, 240,255)
 
 im2, contours, hierarchy = cv2.findContours(morp_dilasi4, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 #draw = cv2.drawContours(img_fore, contours, -1, (0,255,0), 3)
-i = 0
-cnt = contours[2]
-M = cv2.moments(cnt)
-area = cv2.contourArea(cnt)
+contoursList = len(contours)
+vehicle = vehicleInit.vehicle
+for i in range(0, contoursList):
+    cnt = contours[i]
+    M = cv2.moments(cnt)
+    area = cv2.contourArea(cnt)
 
-#print M
-cx = int(M['m10']/M['m00'])
-cy = int(M['m01']/M['m00'])
+    cx = int(M['m10']/M['m00'])
+    cy = int(M['m01']/M['m00'])
 
-#print cx
-#print cy
+    area = cv2.contourArea(cnt)
 
-area = cv2.contourArea(cnt)
-#areas = [cv2.contourArea(c) for c in contours]
-#max_index = np.argmax(areas)
-#cnt=contours[max_index]
+    x,y,w,h = cv2.boundingRect(cnt)
+    font = cv2.FONT_HERSHEY_PLAIN
+    #cv2.putText(img_fore, "{0}".format(i+1), (x+2, y-4), font, 1, (255, 255, 0), 2)
 
-x,y,w,h = cv2.boundingRect(cnt)
-font = cv2.FONT_HERSHEY_PLAIN
-cv2.putText(img_fore, "{0}".format(i+1), (x+2, y-4), font, 1, (255, 255, 0), 2)
+    cv2.rectangle(img_fore,(x,y),(x+w,y+h),(255,255,0),2)
+    cv2.circle(img_fore,(cx,cy),3,255,-1)
+    listVehicleDetected.append(vehicle(i, cx, cy, None, None, None,  None, None, None, None, True))
 
-cv2.rectangle(img_fore,(x,y),(x+w,y+h),(255,255,0),2)
-#print y
-#print x+w
-#print y+h
-crop = img_fore[y:y+h, x:x+w]
-#print area
-#print w * h
-#print M
-#x,y,w,h = cv2.boundingRect(contours)
-#cv2.rectangle(img_fore,(x,y),(x+w,y+h),(0,255,0),2)
-cv2.circle(img_fore,(cx,cy),5,255,-1)
+templist = listVehicleDetected
+
+#dist = [[0 for i in range(templist.__len__())] for j in range(listVehicleDetected.__len__())]
+#if templist.__len__() != listVehicleDetected.__len__()
+
+dist = np.zeros((templist.__len__(), listVehicleDetected.__len__()))
+
+for i in range(templist.__len__()):
+    x1 = templist[i].xCoordinate
+    y1 = templist[i].yCoordinate
+    for j in range(listVehicleDetected.__len__()):
+        x2 = listVehicleDetected[j].xCoordinate
+        y2 = listVehicleDetected[j].yCoordinate
+        dist[i][j] = mo.distancetwoPoint(x1, y1, x2, y2)
+    cv2.putText(img_fore, "{0}".format(templist[i].vehicleID + 1), (x1 + 2, y1 - 4), font, 1, (255, 255, 0), 2)
+
+hungarian = Munkres()
+indexes = hungarian.compute(dist)
+total = 0
+for row, column in indexes:
+    value = dist[row][column]
+    total += value
+    listVehicleDetected[row].vehicleID = templist[column].vehicleID
+    print '(%d, %d) -> %d' % (row, column, value)
+print 'total cost: %d' % total
+
+for i in range(listVehicleDetected.__len__()):
+    x1 = listVehicleDetected[i].xCoordinate
+    y1 = listVehicleDetected[i].yCoordinate
+    cv2.putText(img_fore, "{0}".format(listVehicleDetected[i].vehicleID + 1), (x1 + 10, y1 - 20), font, 1, (255, 255, 0),2)
+
 cv2.imshow("edge", img_fore)
 cv2.waitKey(0)
 cv2.destroyAllWindows()

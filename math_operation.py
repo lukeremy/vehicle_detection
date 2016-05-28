@@ -163,7 +163,7 @@ def distancetwoPoint(x1, y1, x2, y2):
     y2 = float(y2)
 
     distance = math.sqrt((math.pow(math.fabs(x1 - x2), 2) + (math.pow(math.fabs(y1 - y2), 2))))
-    distance = round(distance, 4)
+    distance = int(distance)
 
     return distance
 
