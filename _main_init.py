@@ -12,9 +12,6 @@ from _help_init import HelpInit
 main_ui = uic.loadUiType("gtk/main.ui")[0]
 help_ui = uic.loadUiType("gtk/help.ui")[0]
 
-# Variable
-fileLoc = 0
-
 class MainInit(QMainWindow, main_ui):
     def __init__(self, parent=None):
         # Initialization main interface from QT to Python
@@ -23,15 +20,12 @@ class MainInit(QMainWindow, main_ui):
         # Variable
         self.setupUi(self)
         self.capture = None
+        self.fileLoc = 0
 
         port_cam = ["0", "1", "2"]
-        # Menu Bar
-        # File
-        self.actionOpen_settings.triggered.connect(self.openConfigFile)
-        self.actionSave_settings.triggered.connect(self.saveConfigFile)
-        self.actionExit.triggered.connect(self.file_exit)
-        # About
-        self.actionHelp.triggered.connect(self.helpSetting)
+        # Configuration [Open Setting and Save Setting]
+        self.pushButton_openSetting.clicked.connect(self.openConfigFile)
+        self.pushButton_saveSetting.clicked.connect(self.saveConfigFile)
 
         # 1.    Setting
         self.tabWidget.setCurrentIndex(0)
@@ -96,9 +90,9 @@ class MainInit(QMainWindow, main_ui):
 
         # 1.4.3 Registration and Detection Line
         # 1.4.3.1 Detection Line
-        self.setDetectionLine("420", "123", "532", "123")
+        self.setDetectionLine("500", "122", "615", "122")
         # 1.4.3.2 Registration Line
-        self.setRegistrationLine("342", "325", "619", "325")
+        self.setRegistrationLine("385", "424", "742", "424")
         # 1.5 Button Help and Set
         self.pushButton_helpSetting.clicked.connect(self.helpSetting)
         self.pushButton_setSetting.clicked.connect(self.setSetting)
@@ -349,8 +343,6 @@ class MainInit(QMainWindow, main_ui):
             print "Device"
 
     def selectVideoFile(self):
-        global fileLoc
-
         file_filter = "Movie (*.mp4 *.avi *.mkv)"
         filename = QFileDialog.getOpenFileName(self, "Open video file", 'samples', file_filter, None,
                                                QFileDialog.DontUseNativeDialog)
@@ -358,17 +350,15 @@ class MainInit(QMainWindow, main_ui):
         print "file yg di select {0}".format(filename)
         self.label_selectFile.setText(format(filename))
 
-        fileLoc = format(filename)
-        return fileLoc
+        self.fileLoc = format(filename)
+        return self.fileLoc
 
     def selectionDevice(self):
-        global fileLoc
-
         select = self.comboBox_choseDevice.currentText()
         print "Current index selection ", select
 
-        fileLoc = int(select)
-        return fileLoc
+        self.fileLoc = int(select)
+        return self.fileLoc
 
     def selectFile(self, enabled):
         if enabled:
@@ -387,10 +377,9 @@ class MainInit(QMainWindow, main_ui):
             self.checkBox_showroiVM.setEnabled(True)
 
     def selectDevice(self, enabled):
-        global fileLoc
         if enabled:
             self.comboBox_choseDevice.setEnabled(True)
-            fileLoc = 0
+            self.fileLoc = 0
         else:
             self.comboBox_choseDevice.setEnabled(False)
 
@@ -437,7 +426,7 @@ class MainInit(QMainWindow, main_ui):
         registX1, registY1, registX2, registY2 = self.getRegistrationLine()
 
         print "Camera Input"
-        print "video input: {0}".format(fileLoc)
+        print "video input: {0}".format(self.fileLoc)
         print "video mode: {0}".format(video_mode)
         print "background subtraction: {0}".format(background_subtraction)
         print "boundary: {0}".format(boundary)
@@ -504,7 +493,7 @@ class MainInit(QMainWindow, main_ui):
         time.sleep(1)
 
         if not self.capture:
-            self.capture = cap_init.QtCapture(fileLoc)
+            self.capture = cap_init.QtCapture(self.fileLoc)
 
             self.pushButton_pauseVideo.clicked.connect(self.capture.stop)
             self.pushButton_stopVideo.clicked.connect(self.stopVideo)

@@ -132,8 +132,8 @@ class QtCapture(QtGui.QFrame, video_frame):
 
         # Global variable
         self.start_time = None
-        self.width_frame = 960  # pixel
-        self.height_frame = 540  # pixel
+        self.width_frame = 1120  # pixel
+        self.height_frame = 639  # pixel
         self.init_time = 12  # second /fps (fps 30) -> 24/30 = 0.8 -> 8 second
         self.mask_status = False
         self.mask_frame = None

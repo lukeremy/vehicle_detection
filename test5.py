@@ -13,8 +13,8 @@ file_mog = "samples/test_mog.jpg"
 img_back = cv2.imread(file_mask)
 img_fore = cv2.imread(file_foreground)
 img_mog = cv2.imread(file_mog)
-img_back = cv2.resize(img_back, (960,540))
-img_fore = cv2.resize(img_fore, (960,540))
+img_back = cv2.resize(img_back, (1120,630))
+img_fore = cv2.resize(img_fore, (1120,630))
 
 kernel = np.ones((5,5),np.float32)/25
 hsv_background = cv2.cvtColor(img_back, cv2.COLOR_RGB2HSV)
@@ -58,7 +58,7 @@ cv2.floodFill(threshold,mask, (0,0),255)
 im_floodfill_inv = cv2.bitwise_not(im_floodfill)
 temp_floodfill = im_floodfill
 # Build RoI
-img_zero = np.zeros((540, 960), np.uint8)
+img_zero = np.zeros((630, 1120), np.uint8)
 pts = np.array([[385,220],[50,465],[1040,465],[705,220]])
 
 #cv2.polylines(temp_floodfill,[pts],True,(255,255,0),thickness=1)
