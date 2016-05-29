@@ -1,12 +1,13 @@
 import time
 import sys
+import psutil
 import _capture_init as cap_init
-import _capture_alt_ as cap_alt
 
 from PyQt4 import uic
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from _help_init import HelpInit
+from _preview_init import PreviewInit
 
 # Interface Load
 main_ui = uic.loadUiType("gtk/main.ui")[0]
@@ -89,10 +90,12 @@ class MainInit(QMainWindow, main_ui):
         self.setHighHV(4.2)
 
         # 1.4.3 Registration and Detection Line
+        self.pushButton_preview.clicked.connect(self.previewVideo)
         # 1.4.3.1 Detection Line
         self.setDetectionLine("500", "122", "615", "122")
         # 1.4.3.2 Registration Line
         self.setRegistrationLine("385", "424", "742", "424")
+
         # 1.5 Button Help and Set
         self.pushButton_helpSetting.clicked.connect(self.helpSetting)
         self.pushButton_setSetting.clicked.connect(self.setSetting)
@@ -104,6 +107,7 @@ class MainInit(QMainWindow, main_ui):
         self.pushButton_showLog.clicked.connect(self.showLog)
 
         # 2.2   Capture
+        self.startCPU()
 
         # 3.    Log
         # 3.1   Search
@@ -225,6 +229,10 @@ class MainInit(QMainWindow, main_ui):
 
     def setLogCountHV(self, value):
         self.label_logcountLongVehicle.setText(value)
+
+    def setCPUProcess(self):
+        value = psutil.cpu_percent()
+        self.label_cpuPercentage.setText("{0} %".format(value))
 
     # Get Variable
     def getVideoMode(self):
@@ -451,7 +459,16 @@ class MainInit(QMainWindow, main_ui):
         self.help_win = HelpInit(title, filename, None)
         self.help_win.show()
 
+    def previewVideo(self):
+        self.preview = PreviewInit()
+        self.preview.show()
+
     # Function Tab 2. Video
+    def startCPU(self):
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.setCPUProcess)
+        self.timer.start(1000)
+
     def startVideo(self):
         # Get video mode
         video_mode = self.getVideoMode()
@@ -493,7 +510,7 @@ class MainInit(QMainWindow, main_ui):
         time.sleep(1)
 
         if not self.capture:
-            self.capture = cap_init.QtCapture(self.fileLoc)
+            self.capture = cap_init.QtCapture(self.fileLoc, self.video_frame)
 
             self.pushButton_pauseVideo.clicked.connect(self.capture.stop)
             self.pushButton_stopVideo.clicked.connect(self.stopVideo)
@@ -519,10 +536,8 @@ class MainInit(QMainWindow, main_ui):
 
             self.capture.setDetectionLine(detectX1, detectY1, detectX2, detectY2)
             self.capture.setRegistrationLine(registX1, registY1, registX2, registY2)
-            self.capture.setParent(self.video_frame)
 
         self.capture.start()
-        self.capture.show()
 
     def stopVideo(self):
         self.capture.stop()

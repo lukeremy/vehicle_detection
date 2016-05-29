@@ -61,7 +61,7 @@
       <property name="geometry">
        <rect>
         <x>70</x>
-        <y>150</y>
+        <y>200</y>
         <width>411</width>
         <height>91</height>
        </rect>
@@ -151,7 +151,7 @@
       <property name="geometry">
        <rect>
         <x>70</x>
-        <y>260</y>
+        <y>310</y>
         <width>411</width>
         <height>111</height>
        </rect>
@@ -216,9 +216,9 @@
       <property name="geometry">
        <rect>
         <x>660</x>
-        <y>30</y>
+        <y>70</y>
         <width>411</width>
-        <height>521</height>
+        <height>441</height>
        </rect>
       </property>
       <property name="title">
@@ -736,20 +736,6 @@
          <string>meter</string>
         </property>
        </widget>
-       <zorder>label_inputLV</zorder>
-       <zorder>label_inputHV</zorder>
-       <zorder>label_panjangVehicle</zorder>
-       <zorder>label_lebarVehicle</zorder>
-       <zorder>label_tinggiVehicle</zorder>
-       <zorder>lineEdit_lLV</zorder>
-       <zorder>lineEdit_pLV</zorder>
-       <zorder>lineEdit_tLV</zorder>
-       <zorder>lineEdit_tHV</zorder>
-       <zorder>lineEdit_pHV</zorder>
-       <zorder>lineEdit_lHV</zorder>
-       <zorder>label_lvMeter</zorder>
-       <zorder>label_hvMeter</zorder>
-       <zorder>groupBox</zorder>
       </widget>
       <widget class="QGroupBox" name="groupBox">
        <property name="geometry">
@@ -1041,6 +1027,19 @@
          <string>X2</string>
         </property>
        </widget>
+       <widget class="QPushButton" name="pushButton_preview">
+        <property name="geometry">
+         <rect>
+          <x>199</x>
+          <y>3</y>
+          <width>88</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Draw</string>
+        </property>
+       </widget>
       </widget>
      </widget>
      <widget class="QPushButton" name="pushButton_setSetting">
@@ -1073,7 +1072,7 @@
       <property name="geometry">
        <rect>
         <x>70</x>
-        <y>370</y>
+        <y>420</y>
         <width>391</width>
         <height>91</height>
        </rect>
@@ -1111,8 +1110,8 @@
      <widget class="QPushButton" name="pushButton_openSetting">
       <property name="geometry">
        <rect>
-        <x>420</x>
-        <y>40</y>
+        <x>400</x>
+        <y>80</y>
         <width>88</width>
         <height>29</height>
        </rect>
@@ -1124,8 +1123,8 @@
      <widget class="QPushButton" name="pushButton_saveSetting">
       <property name="geometry">
        <rect>
-        <x>420</x>
-        <y>80</y>
+        <x>400</x>
+        <y>130</y>
         <width>88</width>
         <height>29</height>
        </rect>
@@ -1205,6 +1204,32 @@
       </property>
       <property name="text">
        <string>Log</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_cpuUsage">
+      <property name="geometry">
+       <rect>
+        <x>900</x>
+        <y>640</y>
+        <width>71</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>CPU Usage</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_cpuPercentage">
+      <property name="geometry">
+       <rect>
+        <x>980</x>
+        <y>640</y>
+        <width>56</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
       </property>
      </widget>
     </widget>

@@ -14,10 +14,7 @@ from munkres import Munkres
 
 ocl.setUseOpenCL(False)  # set flag OCL to False if you build OPENCV -D WITH_OPENCL=ON
 
-# Global variable
-video_frame = uic.loadUiType("gtk/video_frame.ui")[0]
-
-class QtCapture(QtGui.QFrame, video_frame):
+class QtCapture:
     def setVideoMode(self, video_mode):
         self.video_mode = video_mode
 
@@ -126,14 +123,13 @@ class QtCapture(QtGui.QFrame, video_frame):
     def getRegistrationLine(self):
         return self.registX1, self.registY1, self.registX2, self.registY2
 
-    def __init__(self, filename):
-        super(QtGui.QFrame, self).__init__()
-        self.setupUi(self)
+    def __init__(self, filename, frame):
+        self.video_frame = frame
 
         # Global variable
         self.start_time = None
         self.width_frame = 1120  # pixel
-        self.height_frame = 639  # pixel
+        self.height_frame = 630  # pixel
         self.init_time = 12  # second /fps (fps 30) -> 24/30 = 0.8 -> 8 second
         self.mask_status = False
         self.mask_frame = None
@@ -157,15 +153,15 @@ class QtCapture(QtGui.QFrame, video_frame):
         # Initiation file
         now = datetime.datetime.now()
         formatDate = now.strftime("%d-%m-%Y %H-%M")
-        self.file = open("output/{0}.csv".format(formatDate), "a")
-        if os.stat("output/{0}.csv".format(formatDate)).st_size == 0:
-            self.file.write("No,Waktu,Jenis Kendaraan,Panjang,Lebar,Gambar\n")
+        #self.file = open("output/{0}.csv".format(formatDate), "a")
+        #if os.stat("output/{0}.csv".format(formatDate)).st_size == 0:
+        #    self.file.write("No,Waktu,Jenis Kendaraan,Panjang,Lebar,Gambar\n")
 
         # Initiation folder
         path = "output"
-        self.formatFolder = now.strftime("{0}/%d-%m-%Y %H-%M").format(path)
-        if not os.path.isdir(self.formatFolder):
-            os.makedirs(self.formatFolder)
+        #self.formatFolder = now.strftime("{0}/%d-%m-%Y %H-%M").format(path)
+        #if not os.path.isdir(self.formatFolder):
+        #    os.makedirs(self.formatFolder)
 
         # Initiation to moving average
         _, PrimImg_frame = self.cap.read()
@@ -174,37 +170,32 @@ class QtCapture(QtGui.QFrame, video_frame):
         self.avg = np.float32(PrimImg_frame)
 
     def start(self):
-        global start_time
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.nextFrame)
         self.timer.start(1000. / self.getFPS())
-        start_time = time.time()
-
-        return start_time
+        self.start_time = time.time()
 
     def stop(self):
         self.timer.stop()
 
     def deleteLater(self):
-        frame = 0
+        self.frame = 0
         # Stop capture
         self.cap.release()
 
         # Close opening file
-        self.file.write("FOV:" + "," + str(self.getFOV()) + "\n" +
-                        "Focal:" + "," + str(self.getFocal()) + "\n" +
-                        "Angle:" + "," + str(self.getElevated()) + "\n" +
-                        "Altitude:" + "," + str(self.getAlt()) + "\n" +
-                        "Total LV:" + "," + str(self.total_LV) + "\n" +
-                        "Total HV:" + "," + str(self.total_HV) + "\n" +
-                        "Total Vehicle:" + "," + str(self.total_HV + self.total_LV) + "\n")
-        self.file.flush()
-        self.file.close()
+        #self.file.write("FOV:" + "," + str(self.getFOV()) + "\n" +
+        #                "Focal:" + "," + str(self.getFocal()) + "\n" +
+        #                "Angle:" + "," + str(self.getElevated()) + "\n" +
+        #                "Altitude:" + "," + str(self.getAlt()) + "\n" +
+        #                "Total LV:" + "," + str(self.total_LV) + "\n" +
+        #                "Total HV:" + "," + str(self.total_HV) + "\n" +
+        #                "Total Vehicle:" + "," + str(self.total_HV + self.total_LV) + "\n")
+        #self.file.flush()
+        #self.file.close()
 
         self.total_HV = 0
         self.total_LV = 0
-
-        super(QtGui.QFrame, self).deleteLater()
 
     def nextFrame(self):
         real_time = time.time()
@@ -224,7 +215,7 @@ class QtCapture(QtGui.QFrame, video_frame):
             # Moving Average subtraction
             cvtScaleAbs = improc.backgroundSubtractionAverage(PrimRGB_frame, self.avg, 0.01)
             movingAverage_frame = cvtScaleAbs
-            initBackground = improc.initBackgrounSubtraction(real_time, start_time, self.init_time)
+            initBackground = improc.initBackgrounSubtraction(real_time, self.start_time, self.init_time)
 
             if not self.mask_status:
                 if not initBackground:
@@ -405,14 +396,6 @@ class QtCapture(QtGui.QFrame, video_frame):
 
             widthVehicle = mo.horizontalPinHoleModel(self.width_frame, focal, altitude, xContour, (xContour + widthContour), centerVehicle)
 
-            # -- [x] Vehicle Classification -------------#
-            # IS    :
-            # FS    :
-            if lengthVehicle <= maxLengthLV:
-                vehicleClassification = "LV"
-            else:
-                vehicleClassification = "HV"
-
             # -- [x] Draw Boundary -----------------------#
             # IS    :
             # FS    :
@@ -422,16 +405,24 @@ class QtCapture(QtGui.QFrame, video_frame):
             size = 2
             areaThreshold = 40
 
-            if (widthVehicle >= 1.0) and (widthVehicle <= 8.0) and (lengthVehicle >= 1.5) and (lengthVehicle < maxLengthHV) and (areaContours >= (float(areaBoundary) * (float(areaThreshold) / 100))):
+            #print widthVehicle
+            #print lengthVehicle
 
+            if (widthVehicle >= 1.0) and (widthVehicle <= 8.0) and (lengthVehicle >= 1.5) and (lengthVehicle < maxLengthHV) and (areaContours >= (float(areaBoundary) * (float(areaThreshold) / 100))):
                 # Get moment for centroid
+                #print "masuk loop vehicle classification"
                 Moment = cv2.moments(cnt)
                 xCentroid = int(Moment['m10'] / Moment['m00'])
                 yCentroid = int(Moment['m01'] / Moment['m00'])
 
-                if vehicleClassification == "LV":
+                # -- [x] Vehicle Classification -------------#
+                # IS    :
+                # FS    :
+                if lengthVehicle <= maxLengthLV:
+                    vehicleClassification = "LV"
                     color = colorLV
                 else:
+                    vehicleClassification = "HV"
                     color = colorHV
 
                 if self.getBoundary():
@@ -443,91 +434,96 @@ class QtCapture(QtGui.QFrame, video_frame):
                 # IS    :
                 # FS    :
                 if self.tempList.__len__() == 0:
+                    #print self.tempList.__len__()
                     self.listVehicleDetected.append(self.vehicle(None, xCentroid, yCentroid, lengthVehicle, widthVehicle, vehicleClassification, xContour, yContour, widthContour, highContour, True))
                     self.tempList = self.listVehicleDetected
+                    #print self.tempList.__len__()
                 else:
                     self.listVehicleDetected.append(self.vehicle(None, xCentroid, yCentroid, lengthVehicle, widthVehicle, vehicleClassification, xContour, yContour, widthContour, highContour, True))
 
         # -- [x] Vehicle Tracking -------------------------------#
         # IS    :
         # FS    : Hungarian algorithm with munkres
-        # distance = np.zeros((self.tempList.__len__(), self.listVehicleDetected.__len__()))
-        distance = [[0 for i in range(self.tempList.__len__())] for j in range(self.listVehicleDetected.__len__())]
-        for i in range(self.tempList.__len__()):
-            for j in range(self.listVehicleDetected.__len__()):
-                x1 = self.tempList[i].xCoordinate
-                y1 = self.tempList[i].yCoordinate
-                x2 = self.listVehicleDetected[j].xCoordinate
-                y2 = self.listVehicleDetected[j].yCoordinate
-                distance[j][i] = mo.distancetwoPoint(x1, y1, x2, y2)
+        if self.tempList.__len__() != 0:
+            distance = np.zeros((self.tempList.__len__(), self.listVehicleDetected.__len__()))
+            #distance = [[0 for i in range(self.tempList.__len__())] for j in range(self.listVehicleDetected.__len__())]
+            #print "masuk loop hungarian algorithm"
+            #print distance
+            for i in range(self.tempList.__len__()):
+                for j in range(self.listVehicleDetected.__len__()):
+                    x1 = self.tempList[i].xCoordinate
+                    y1 = self.tempList[i].yCoordinate
+                    x2 = self.listVehicleDetected[j].xCoordinate
+                    y2 = self.listVehicleDetected[j].yCoordinate
+                    distance[j][i] = mo.distancetwoPoint(x1, y1, x2, y2)
 
-        hungarian = Munkres()
-        indexes = hungarian.compute(distance)
-        total = 0
+            hungarian = Munkres()
+            indexes = hungarian.compute(distance)
+            total = 0
 
-        for row, column in indexes:
-            value = distance[row][column]
-            total += value
-            self.listVehicleDetected[row].vehicleID = self.tempList[column].vehicleID
-            #print '(%d, %d) -> %d' % (row, column, value)
-        # -- [x] Counting Detection -----------------------------#
-        # IS    :
-        # FS    :
+            for row, column in indexes:
+                value = distance[row][column]
+                total += value
+                self.listVehicleDetected[row].vehicleID = self.tempList[column].vehicleID
+                #print '(%d, %d) -> %d' % (row, column, value)
+            # -- [x] Counting Detection -----------------------------#
+            # IS    :
+            # FS    :
 
-        for i in range(self.tempList.__len__()):
-            stopGap = 80
-            changeRegistLine_color = (255, 255, 255)
-            changeThick = 4
+            for i in range(self.tempList.__len__()):
+                stopGap = 80
+                changeRegistLine_color = (255, 255, 255)
+                changeThick = 4
 
-            vehicleID = self.listVehicleDetected[i].vehicleID
-            xCentroid = self.listVehicleDetected[i].xCoordinate
-            yCentroid = self.listVehicleDetected[i].yCoordinate
-            vehicleClassification = self.listVehicleDetected[i].vehicleClass
-            vehicleLifeTime = self.listVehicleDetected[i].lifetime
+                vehicleID = self.listVehicleDetected[i].vehicleID
+                xCentroid = self.listVehicleDetected[i].xCoordinate
+                yCentroid = self.listVehicleDetected[i].yCoordinate
+                vehicleClassification = self.listVehicleDetected[i].vehicleClass
+                vehicleLifeTime = self.listVehicleDetected[i].lifetime
 
-            yPredict = mo.funcY_line(registX1, registY1, registX2, registY2, xCentroid)
-            countClass = improc.initCounting(registX1, registY1, registX2, registX2, xCentroid, yPredict, vehicleClassification)
+                yPredict = mo.funcY_line(registX1, registY1, registX2, registY2, xCentroid)
+                countClass = improc.initCounting(registX1, registY1, registX2, registX2, xCentroid, yPredict, vehicleClassification)
 
-            if (yCentroid >= yPredict) and (yCentroid < yPredict + stopGap) and (xCentroid >= registX1) and (xCentroid <= registX2) and (vehicleLifeTime is True):
-                if countClass == "LV":
-                    self.total_LV += 1
-                elif countClass == "HV":
-                    self.total_HV += 1
+                if (yCentroid >= yPredict) and (yCentroid < yPredict + stopGap) and (xCentroid >= registX1) and (xCentroid <= registX2) and (vehicleLifeTime is True):
+                    if countClass == "LV":
+                        self.total_LV += 1
+                    elif countClass == "HV":
+                        self.total_HV += 1
 
-                self.totalVehicle = self.total_LV + self.total_HV
+                    self.totalVehicle = self.total_LV + self.total_HV
 
-                self.listVehicleDetected[i].lifetime = False
+                    self.listVehicleDetected[i].lifetime = False
 
-                improc.addText(PrimRGB_frame, vehicleID, size, (xCentroid + 5), (yCentroid - 5))
-                cv2.line(bin_frame, (registX1, registY1), (registX2, registY2), changeRegistLine_color, changeThick)
-                print "Total LV: {0} | Total HV: {1} | class: {2} length: {3} width: {4}".format(self.total_LV, self.total_HV, countClass, lengthVehicle, widthVehicle)
+                    improc.addText(PrimRGB_frame, vehicleID, size, (xCentroid + 5), (yCentroid - 5))
+                    cv2.line(bin_frame, (registX1, registY1), (registX2, registY2), changeRegistLine_color, changeThick)
+                    print "Total LV: {0} | Total HV: {1} | class: {2} length: {3} width: {4}".format(self.total_LV, self.total_HV, countClass, lengthVehicle, widthVehicle)
 
-                # -- [x] Crop Image -------------------------#
-                # IS    :
-                # FS    :
-                xContour = self.listVehicleDetected[i].xContour
-                yContour = self.listVehicleDetected[i].yContour
-                widthContour = self.listVehicleDetected[i].widthContour
-                highContour = self.listVehicleDetected[i].highContour
+                    # -- [x] Crop Image -------------------------#
+                    # IS    :
+                    # FS    :
+                    xContour = self.listVehicleDetected[i].xContour
+                    yContour = self.listVehicleDetected[i].yContour
+                    widthContour = self.listVehicleDetected[i].widthContour
+                    highContour = self.listVehicleDetected[i].highContour
 
-                now = datetime.datetime.now()
-                formatDate = now.strftime("%d%m%Y_%H%M%S")
+                    now = datetime.datetime.now()
+                    formatDate = now.strftime("%d%m%Y_%H%M%S")
 
-                formatFileName = "{0}/{1}_{2:03}_{3}.jpg".format(self.formatFolder, countClass, (self.total_LV + self.total_HV), formatDate)
-                # cropping_frame = PrimResize_frame[yContour:yContour + highContour, xContour:xContour + widthContour]
-                # cv2.imwrite(formatFileName, cropping_frame)
+                    # formatFileName = "{0}/{1}_{2:03}_{3}.jpg".format(self.formatFolder, countClass, (self.total_LV + self.total_HV), formatDate)
+                    # cropping_frame = PrimResize_frame[yContour:yContour + highContour, xContour:xContour + widthContour]
+                    # cv2.imwrite(formatFileName, cropping_frame)
 
-                # -- [x] Save Filename to Text --------------#
-                # IS    :
-                # FS    :
-                formatDate = now.strftime("%d:%m:%Y %H:%M:%S")
-                self.file.write(str(self.totalVehicle) + "," +
-                                str(formatDate) + "," +
-                                str(countClass) + "," +
-                                str(lengthVehicle) + "," +
-                                str(widthVehicle) + "," +
-                                str(formatFileName) + "\n")
-                self.file.flush()
+                    # -- [x] Save Filename to Text --------------#
+                    # IS    :
+                    # FS    :
+                    formatDate = now.strftime("%d:%m:%Y %H:%M:%S")
+                    #self.file.write(str(self.totalVehicle) + "," +
+                    #                str(formatDate) + "," +
+                    #                str(countClass) + "," +
+                    #                str(lengthVehicle) + "," +
+                    #                str(widthVehicle) + "," +
+                    #                str(formatFileName) + "\n")
+                    #self.file.flush()
 
         # ---------- Do not disturb this source code ----------- #
         if self.getVideoMode() == "RGB":

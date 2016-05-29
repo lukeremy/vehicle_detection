@@ -1,46 +1,43 @@
+import sys
 import cv2
-import numpy as np
+from PyQt4 import QtGui, QtCore
 
-filename = "samples/BlobTest.jpg"
-img = cv2.imread(filename)
-img_resize = cv2.resize(img, (600, 400))
+class QCustomLabel (QtGui.QLabel):
+    def __init__ (self, parent = None):
+        super(QCustomLabel, self).__init__(parent)
+        self.setMouseTracking(True)
+        self.setTextLabelPosition(0, 0)
+        self.setAlignment(QtCore.Qt.AlignCenter)
 
-gray = cv2.cvtColor(img_resize, cv2.COLOR_RGB2GRAY)
-# mask
-params = cv2.SimpleBlobDetector_Params()
+    def mouseMoveEvent (self, eventQMouseEvent):
+        self.setTextLabelPosition(eventQMouseEvent.x(), eventQMouseEvent.y())
+        QtGui.QWidget.mouseMoveEvent(self, eventQMouseEvent)
 
-# Change thresholds
-params.minThreshold = 10
-params.maxThreshold = 200
+    def mousePressEvent (self, eventQMouseEvent):
+        if eventQMouseEvent.button() == QtCore.Qt.LeftButton:
+            QtGui.QMessageBox.information(self, 'Position', '( %d : %d )' % (self.x, self.y))
+        QtGui.QWidget.mousePressEvent(self, eventQMouseEvent)
 
-# Filter by Area.
-params.filterByArea = True
-params.minArea = 500
+    def setTextLabelPosition (self, x, y):
+        self.x, self.y = x, y
+        self.setText('Please click on screen ( %d : %d )' % (self.x, self.y))
 
-# Filter by Circularity
-params.filterByCircularity = True
-params.minCircularity = 0.1
+class QCustomWidget (QtGui.QWidget):
+    def __init__ (self, parent = None):
+        super(QCustomWidget, self).__init__(parent)
+        self.setWindowOpacity(0.7)
+        # Init QLabel
+        self.positionQLabel = QCustomLabel(self)
+        # Init QLayout
+        layoutQHBoxLayout = QtGui.QHBoxLayout()
+        layoutQHBoxLayout.addWidget(self.positionQLabel)
+        layoutQHBoxLayout.setMargin(0)
+        layoutQHBoxLayout.setSpacing(0)
+        self.setLayout(layoutQHBoxLayout)
+        self.showFullScreen()
 
-# Filter by Convexity
-params.filterByConvexity = True
-params.minConvexity = 0.5
 
-# Filter by Inertia
-params.filterByInertia = True
-params.minInertiaRatio = 0.01
-
-# Create a detector with the parameters
-ver = cv2.__version__.split('.')
-if int(ver[0]) < 3:
-    detector = cv2.SimpleBlobDetector_Params()
-else:
-    detector = cv2.SimpleBlobDetector_create(params)
-
-keypoint = detector.detect(gray)
-# show
-im_with_keypoint = cv2.drawKeypoints(gray, keypoint,np.array([]),(0,0,255),cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-
-cv2.imshow("original", im_with_keypoint)
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+myQApplication = QtGui.QApplication(sys.argv)
+myQTestWidget = QCustomWidget()
+myQTestWidget.show()
+myQApplication.exec_()
