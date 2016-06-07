@@ -3,11 +3,12 @@ import numpy as np
 import _vehicle_init as vehicleInit
 import math_operation as mo
 from munkres import Munkres
-
+import math
+import random
 listVehicleDetected = []
 templist = []
 file_mask = "samples/background2.jpg"
-file_foreground = "samples/frameori2.jpg"
+file_foreground = "samples/test3.png"
 file_mog = "samples/test_mog.jpg"
 
 img_back = cv2.imread(file_mask)
@@ -104,39 +105,42 @@ for i in range(0, contoursList):
     cy = int(M['m01']/M['m00'])
 
     area = cv2.contourArea(cnt)
+    print random.randrange(10,50,1)
 
     x,y,w,h = cv2.boundingRect(cnt)
     font = cv2.FONT_HERSHEY_PLAIN
-    #cv2.putText(img_fore, "{0}".format(i+1), (x+2, y-4), font, 1, (255, 255, 0), 2)
-
+    print mo.getFocalfromFOV(630, 80)
+    focal = 375
+    pinhole = mo.vertikalPinHoleModel(1120, focal, 6,20, y, (y+h), 1.5, 4.0, 6)
     cv2.rectangle(img_fore,(x,y),(x+w,y+h),(255,255,0),2)
     cv2.circle(img_fore,(cx,cy),3,255,-1)
+    print pinhole
+    #cv2.putText(img_fore, pinhole, ((x+w)/2, (y+h)/2), font, 2, (255,255,0),1)
     listVehicleDetected.append(vehicle(i, cx, cy, None, None, None,  None, None, None, None, True))
 
 templist = listVehicleDetected
-
-#dist = [[0 for i in range(templist.__len__())] for j in range(listVehicleDetected.__len__())]
-#if templist.__len__() != listVehicleDetected.__len__()
-
-dist = np.zeros((templist.__len__(), listVehicleDetected.__len__()))
+dist = [[0 for i in range(templist.__len__())] for j in range(listVehicleDetected.__len__())]
+#dist = np.zeros((templist.__len__(), listVehicleDetected.__len__()))
 
 for i in range(templist.__len__()):
-    x1 = templist[i].xCoordinate
-    y1 = templist[i].yCoordinate
+    x1 = templist[i].xCoordinate - random.randrange(10,50,3)
+    y1 = templist[i].yCoordinate + random.randrange(10,50,1)
     for j in range(listVehicleDetected.__len__()):
         x2 = listVehicleDetected[j].xCoordinate
         y2 = listVehicleDetected[j].yCoordinate
         dist[i][j] = mo.distancetwoPoint(x1, y1, x2, y2)
-    cv2.putText(img_fore, "{0}".format(templist[i].vehicleID + 1), (x1 + 2, y1 - 4), font, 1, (255, 255, 0), 2)
+    cv2.circle(img_fore, (x1, y1), 3, 255, -1)
+    cv2.putText(img_fore, "{0}".format(templist[i].vehicleID + 1), (x1 + 1, y1 - 1), font, 1, (255, 255, 0), 2)
 
 hungarian = Munkres()
+print dist
 indexes = hungarian.compute(dist)
 total = 0
 for row, column in indexes:
     value = dist[row][column]
     total += value
-    listVehicleDetected[row].vehicleID = templist[column].vehicleID
     print '(%d, %d) -> %d' % (row, column, value)
+    listVehicleDetected[row].vehicleID = templist[column].vehicleID
 print 'total cost: %d' % total
 
 for i in range(listVehicleDetected.__len__()):

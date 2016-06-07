@@ -11,7 +11,6 @@ from _preview_init import PreviewInit
 
 # Interface Load
 main_ui = uic.loadUiType("gtk/main.ui")[0]
-help_ui = uic.loadUiType("gtk/help.ui")[0]
 
 class MainInit(QMainWindow, main_ui):
     def __init__(self, parent=None):
@@ -31,7 +30,7 @@ class MainInit(QMainWindow, main_ui):
         # 1.    Setting
         self.tabWidget.setCurrentIndex(0)
         self.tabWidget.setTabEnabled(1, False)
-        self.tabWidget.setTabEnabled(2, False)
+        self.tabWidget.setTabEnabled(2, True)
 
         # 1.1.  VideoInput
         self.radioButton_choseDevice.setChecked(True)
@@ -63,6 +62,7 @@ class MainInit(QMainWindow, main_ui):
         # 1.4   Data Input
         # 1.4.1 Camera
         diagonalFOV = ["90", "127", "160"]
+        sensorType = ["1/3.2'"]
 
         self.setAlt(6)
         self.setElevated(20)
@@ -71,6 +71,10 @@ class MainInit(QMainWindow, main_ui):
 
         self.radioButton_focalLength.setChecked(True)
         self.radioButton_fieldofview.setChecked(False)
+
+        self.comboBox_sensor.setEnabled(False)
+        self.comboBox_sensor.addItems(sensorType)
+        self.comboBox_sensor.setCurrentIndex(0)
 
         self.lineEdit_focalCam.setEnabled(True)
         self.comboBox_fov.setEnabled(False)
@@ -232,7 +236,7 @@ class MainInit(QMainWindow, main_ui):
 
     def setCPUProcess(self):
         value = psutil.cpu_percent()
-        self.label_cpuPercentage.setText("{0} %".format(value))
+        self.label_cpuPercentage.setText(": {0} %".format(value))
 
     # Get Variable
     def getVideoMode(self):
@@ -460,14 +464,15 @@ class MainInit(QMainWindow, main_ui):
         self.help_win.show()
 
     def previewVideo(self):
-        self.preview = PreviewInit()
+        self.preview = PreviewInit(self.fileLoc)
+        self.preview.start()
         self.preview.show()
 
     # Function Tab 2. Video
     def startCPU(self):
         self.timer = QTimer()
         self.timer.timeout.connect(self.setCPUProcess)
-        self.timer.start(1000)
+        self.timer.start(800)
 
     def startVideo(self):
         # Get video mode
@@ -514,6 +519,7 @@ class MainInit(QMainWindow, main_ui):
 
             self.pushButton_pauseVideo.clicked.connect(self.capture.stop)
             self.pushButton_stopVideo.clicked.connect(self.stopVideo)
+            self.tabWidget.setTabEnabled(2, False)
 
             self.capture.setVideoMode(video_mode)
             self.capture.setBackgroundSubtraction(background_subtraction)
