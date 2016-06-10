@@ -148,7 +148,7 @@ for i in range(listVehicleDetected.__len__()):
     y1 = listVehicleDetected[i].yCoordinate
     cv2.putText(img_fore, "{0}".format(listVehicleDetected[i].vehicleID + 1), (x1 + 10, y1 - 20), font, 1, (255, 255, 0),2)
 
-cv2.imshow("edge", img_fore)
+cv2.imshow("edge", threshold)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
