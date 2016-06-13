@@ -12,7 +12,6 @@ Features
 - Counting vehicle
 - on progess for shadow removal, hope i can finish this. :D
 - With GUI of course :D
-- 
 
 Installation
 ------------
