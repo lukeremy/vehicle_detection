@@ -18,7 +18,7 @@ Installation
 
 Requirement
 ----------
-Actualy i dont know the minimun requirement, but im implement this application with:
+Actualy I don't know the minimun requirement, but i'm implement this application with:
 - OpenCV 3.1.0
 - QT Designer
 - Munkres 1.0.7
