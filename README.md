@@ -1,7 +1,32 @@
-# Vehicle Detection
-Simple vehicle detection and counting with python and open cv final test
+Vehicle Detection
+=====
 
-# Installation
+Desription
+----------
+This software is use for vehicle detection and counting in video with python and open cv for our final year project and finish our study. 
 
-# About
+Features
+-------
+- Detect vehicle in video
+- Tracking vehicle in video
+- Counting vehicle
+- on progess for shadow removal, hope i can finish this. :D
+- With GUI of course :D
+- 
+
+Installation
+------------
+
+Requirement
+----------
+Actualy i dont know the minimun requirement, but im implement this application with:
+- OpenCV 3.1.0
+- QT Designer
+- Munkres 1.0.7
+- Pycharm with Python 2.7.6
+
+Authors
+------
+Auzan Muhammad Hanisa
+Version : 0.1
 
