@@ -6,15 +6,20 @@ def centeroidPinHoleMode(height, focal, altitude, theta, yCoordinate):
     # altitude -> |O'O| : tinggi kamera (m)
     # theta : sudut kemiringan kamera (derajat)
     # yCoordinate : indeks piksel Y object
+    height = float(height)
+    focal = float(focal)
+    theta = float(theta)
+    yCoordinate = float(yCoordinate)
 
     delta = math.degrees(math.atan(math.fabs(yCoordinate - (height / 2)) / focal))
 
-    if yCoordinate >= height / 2:
+    if yCoordinate <= height / 2:
         lCentroid = altitude * math.tan(math.radians(theta + delta))
     else:
         lCentroid = altitude * math.tan(math.radians(theta - delta))
 
     lCentroid = round(lCentroid, 4)
+    delta = round(delta, 4)
 
     if (theta + delta) > 90.0:
         Lcenteroid = "unknown length"
@@ -36,12 +41,12 @@ def vertikalPinHoleModel(height, focal, altitude, theta, y1, y2, maxHighLV, maxH
     delta1 = math.degrees(math.atan(math.fabs(y1 - (height / 2)) / focal))
     delta2 = math.degrees(math.atan(math.fabs(y2 - (height / 2)) / focal))
 
-    if y1 >= height / 2:
+    if y1 <= height / 2:
         Lx1 = altitude * math.tan(math.radians(theta + delta1))
     else:
         Lx1 = altitude * math.tan(math.radians(theta - delta1))
 
-    if y2 >= height / 2:
+    if y2 <= height / 2:
         Lx2 = altitude * math.tan(math.radians(theta + delta2))
     else:
         Lx2 = altitude * math.tan(math.radians(theta - delta2))
@@ -58,7 +63,7 @@ def vertikalPinHoleModel(height, focal, altitude, theta, y1, y2, maxHighLV, maxH
     else:
         X2G = estimationVehicleHigh * math.tan(math.radians(theta - delta2))
 
-    Lv = math.fabs(Lx1 - Lx2)
+    Lv = math.fabs(Lx1 - (Lx2 + X2G))
 
     delta1 = round(delta1, 3)
     delta2 = round(delta2, 3)

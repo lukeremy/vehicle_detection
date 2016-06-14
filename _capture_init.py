@@ -141,8 +141,6 @@ class QtCapture:
         self.width_frame = 1120  # pixel
         self.height_frame = 630  # pixel
         self.init_time = 5  # second /fps (fps 30) -> 24/30 = 0.8 -> 8 second
-        self.mask_status = False
-        self.mask_frame = None
         self.frame = 0
         self.total_LV = 0
         self.total_HV = 0
@@ -164,6 +162,11 @@ class QtCapture:
         # Initiation vehicle module
         self.vehicle = vehicleInit.vehicle
         self.trajectory = trajectoryInit.trajectory
+
+        # Fps
+        self.firstFrame = 0
+        self.endFrame = 0
+        self.processTime = 0
 
         # Initiation file
         now = datetime.datetime.now()
@@ -187,11 +190,22 @@ class QtCapture:
     def start(self):
         self.timer = QtCore.QTimer()
         self.timer.start(1000. / self.getFPS())
+        self.timer.timeout.connect(self.timeFirstFrame)
         self.timer.timeout.connect(self.getNextStatusFrame)
+        self.timer.timeout.connect(self.timeEndFrame)
         self.start_time = time.time()
 
     def stop(self):
         self.timer.stop()
+
+    def timeFirstFrame(self):
+        self.firstFrame = time.time()
+        return self.firstFrame
+
+    def timeEndFrame(self):
+        self.endFrame = time.time()
+        self.processTime = self.endFrame - self.firstFrame
+        return self.processTime
 
     def deleteLater(self):
         self.frame = 0
@@ -221,8 +235,7 @@ class QtCapture:
             self.nextFrame()
 
     def nextFrame(self):
-        startTime = time.time()
-
+        initTime = time.time()
         ret, PrimImg_frame = self.cap.read()
         self.frame = int(self.cap.get(cv2.CAP_PROP_POS_FRAMES))
 
@@ -239,7 +252,7 @@ class QtCapture:
             # Moving Average subtraction
             cvtScaleAbs = improc.backgroundSubtractionAverage(PrimRGB_frame, self.avg, 0.01)
             movingAverage_frame = cvtScaleAbs
-            initBackground = improc.initBackgrounSubtraction(startTime, self.start_time, self.init_time)
+            initBackground = improc.initBackgrounSubtraction(initTime, self.start_time, self.init_time)
 
             # --- [x] Convert to Different Color Space ----------------#
             # IS    :
@@ -289,10 +302,9 @@ class QtCapture:
         else:  # Mixture of Gaussian
             # Mixture of Gaussian Model Background Subtraction
             MOG_frame = self.initMOG2.apply(PrimRGB_frame)
-            # thresholdLevel = 30
-            # _, threshold = cv2.threshold(MOG_frame, thresholdLevel, 255, cv2.THRESH_BINARY)
+            thresholdLevel = 128
+            _, threshold = cv2.threshold(MOG_frame, thresholdLevel, 255, cv2.THRESH_BINARY)
             # medianFilter = cv2.medianBlur(MOG_frame, 21)
-            threshold = MOG_frame
 
         bin_frame = threshold.copy()
         # -- [x] Draw Detection and RegistrationLine -------------#
@@ -428,30 +440,32 @@ class QtCapture:
                 # IS    :
                 # FS    :
                 self.currentListVehicle.append(self.vehicle(self.totalVehicle + 1 + self.currentListVehicle.__len__(), xCentroid, yCentroid, lengthVehicle, widthVehicle, vehicleClassification, xContour, yContour, widthContour, highContour, False))
-                self.currentTrajectory.append(self.trajectory(self.totalVehicle + 1 + self.currentListVehicle.__len__(), xCentroid, yCentroid, False))
+                self.currentTrajectory.append(self.trajectory(self.totalVehicle + 1 + self.currentListVehicle.__len__(), xCentroid, yCentroid))
 
         if self.pastListVehicle.__len__() == 0:
             self.pastListVehicle = self.currentListVehicle
-
         elif self.pastListVehicle.__len__() != self.currentListVehicle.__len__():
             self.pastListVehicle = self.currentListVehicle
-
         elif self.currentListVehicle.__len__() < self.pastListVehicle.__len__():
             self.currentListVehicle = self.pastListVehicle
 
-        if self.tempTrajectory.__len__() == 0:
-            self.tempTrajectory = self.currentTrajectory
+        if self.pastTrajectory.__len__() == 0:
+            self.pastTrajectory = self.currentTrajectory
+        elif self.pastTrajectory.__len__() != self.currentTrajectory.__len__():
+            self.pastTrajectory = self.currentTrajectory
+        elif self.currentTrajectory.__len__() < self.pastTrajectory.__len__():
+            self.currentTrajectory = self.pastTrajectory
 
-        # -- [x] Vehicle Tracking -------------------------------#
+        # -- [x] Hungarian Algorithm ----------------------------#
         # IS    :
         # FS    : Hungarian algorithm by munkres
-        Hungarian = True
-        Tracking = False
+        hungarianAlgorithmStatus = True
+        trackingStatus = False
 
         # print "temp: {0}".format(self.tempList.__len__())
         # print "curr: {0}".format(self.currentListVehicle.__len__())
 
-        if self.pastListVehicle.__len__() != 0 and self.currentListVehicle.__len__() != 0 and Hungarian is True:
+        if self.pastListVehicle.__len__() != 0 and self.currentListVehicle.__len__() != 0 and hungarianAlgorithmStatus is True:
             distance = [[0 for i in range(self.pastListVehicle.__len__())] for j in range(self.currentListVehicle.__len__())]
 
             for i in range(self.pastListVehicle.__len__()):
@@ -467,9 +481,19 @@ class QtCapture:
 
             for row, column in indexes:
                 self.currentListVehicle[row].lifetime = self.pastListVehicle[column].lifetime
+                # self.currentTrajectory[row].lifetime = self.pastTrajectory[column].lifetime
+                # if self.currentListVehicle[row].lifetime is False:
+                #    self.pastTrajectory[row].xCoordinate = self.currentListVehicle[column].xCoordinate
+                #    self.pastTrajectory[row].yCoordinate = self.currentListVehicle[column].yCoordinate
+                #    self.tempTrajectory[row].xCoordinate = self.pastTrajectory[row].xCoordinate
+                #    self.tempTrajectory[row].yCoordinate = self.pastTrajectory[row].yCoordinate
+                # else:
+                #    self.pastTrajectory[row].xCoordinate = self.tempTrajectory[row].xCoordinate
+                #    self.pastTrajectory[row].yCoordinate = self.tempTrajectory[row].yCoordinate
+
                 # print "vID: {0} | lifetime: {1}".format(self.tempList[row].vehicleID, self.tempList[row].lifetime)
 
-            Tracking = True
+            trackingStatus = True
 
         # -- [x] Print Trajectory -------------------------------#
         # IS    :
@@ -489,6 +513,10 @@ class QtCapture:
             if (yTrajectory < yPredictTrajectory) and (xTrajectory >= registX1) and (xTrajectory <= registX2):
                 cv2.circle(PrimRGB_frame, (xTrajectory, yTrajectory), size, (0, 255, 255), thick)
 
+        # -- [x] Speed Detection --------------------------------#
+        # IS    :
+        # FS    :
+
         # -- [x] Counting Detection -----------------------------#
         # IS    :
         # FS    :
@@ -499,7 +527,7 @@ class QtCapture:
         changeRegistLine_color = (255, 255, 255)
         changeThick = 4
 
-        if Tracking is True:
+        if trackingStatus is True:
             for i in range(self.currentListVehicle.__len__()):
                 vehicleID = self.currentListVehicle[i].vehicleID
                 xCentroid = self.currentListVehicle[i].xCoordinate
@@ -508,8 +536,8 @@ class QtCapture:
                 vehicleClassification = self.currentListVehicle[i].vehicleClass
                 vehicleLifeTime = self.currentListVehicle[i].lifetime
 
-                xCenteroidBefore = self.pastListVehicle[i].xCoordinate
-                yCenteroidBefore = self.pastListVehicle[i].yCoordinate
+                xCenteroidBefore = self.pastTrajectory[i].xCoordinate
+                yCenteroidBefore = self.pastTrajectory[i].yCoordinate
 
                 print "vid count : {0} | lifetime: {1} | xCord: {2} | yCord: {3} | xLastCord: {4} | yLastCord: {5}".format(vehicleID, vehicleLifeTime, xCentroid, yCentroid, xCenteroidBefore, yCenteroidBefore)
 
@@ -581,6 +609,3 @@ class QtCapture:
 
         pix = QtGui.QPixmap.fromImage(img)
         self.video_frame.setPixmap(pix)
-
-        endTime = time.time()
-        print "waktu proses: {0} second".format(endTime - startTime)
