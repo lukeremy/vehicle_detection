@@ -53,6 +53,7 @@ class MainInit(QMainWindow, main_ui):
         self.radioButton_binVM.setChecked(False)
         self.checkBox_showboundaryVM.setChecked(False)
         self.checkBox_showroiVM.setChecked(False)
+        self.checkBox_shadowRemoval.setChecked(False)
 
         self.radioButton_binVM.toggled.connect(self.selectBinary)
 
@@ -277,6 +278,9 @@ class MainInit(QMainWindow, main_ui):
     def getRoi(self):
         return self.checkBox_showroiVM.isChecked()
 
+    def getShadowRemoval(self):
+        return self.checkBox_shadowRemoval.isChecked()
+
     def getBackgroundSubtraction(self):
         if self.radioButton_BsMOG.isChecked():
             background_subtraction = "MOG"
@@ -465,6 +469,7 @@ class MainInit(QMainWindow, main_ui):
         video_mode = self.getVideoMode()
         boundary = self.getBoundary()
         roi = self.getRoi()
+        shadow = self.getShadowRemoval()
 
         # Get background subtraction
         background_subtraction = self.getBackgroundSubtraction()
@@ -498,8 +503,7 @@ class MainInit(QMainWindow, main_ui):
         print "video input: {0}".format(self.fileLoc)
         print "video mode: {0}".format(video_mode)
         print "background subtraction: {0}".format(background_subtraction)
-        print "boundary: {0}".format(boundary)
-        print "roi: {0}".format(roi)
+        print "boundary: {0} | roi: {1} | shadow removal: {2}".format(boundary, roi, shadow)
         print "alt: {0} | elevated: {1} | fps: {2} | focal:{3} | fov: {4}".format(alt, elevated, fps, focal, fov)
         print "Vehicle Input"
         print "LV >> length: {0} | width: {1} | high: {2}".format(length_LV, width_LV, high_LV)
@@ -531,6 +535,7 @@ class MainInit(QMainWindow, main_ui):
         video_mode = self.getVideoMode()
         boundary = self.getBoundary()
         roi = self.getRoi()
+        shadow = self.getShadowRemoval()
 
         # Get background subtraction
         background_subtraction = self.getBackgroundSubtraction()
@@ -577,6 +582,7 @@ class MainInit(QMainWindow, main_ui):
             self.capture.setBackgroundSubtraction(background_subtraction)
             self.capture.setROI(roi)
             self.capture.setBoundary(boundary)
+            self.capture.setShadow(shadow)
 
             self.capture.setFPS(fps)
             self.capture.setAlt(alt)

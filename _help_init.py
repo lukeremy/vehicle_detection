@@ -1,12 +1,9 @@
 from PyQt4 import uic
 from PyQt4.QtGui import *
 
-help_ui = uic.loadUiType("gtk/help.ui")[0]
+userInterface = uic.loadUiType("gtk/help.ui")[0]
 
-file_txt = "config/uji.txt"
-
-
-class HelpInit(QDialog, help_ui):
+class HelpInit(QDialog, userInterface):
     def __init__(self, title, file, parent=None):
         # Initialization help interface from QT to Python
 

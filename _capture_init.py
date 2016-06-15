@@ -7,6 +7,7 @@ import image_processing as improc
 import math_operation as mo
 import _vehicle_init as vehicleInit
 import _trajectory_init as trajectoryInit
+import shadow_removal as sr
 
 from PyQt4 import QtGui, QtCore
 from PyQt4 import uic
@@ -39,6 +40,12 @@ class QtCapture:
 
     def getROI(self):
         return self.roi
+
+    def setShadow(self, shadow):
+        self.shadow = shadow
+
+    def getShadow(self):
+        return self.shadow
 
     def setFPS(self, fps):
         self.fps = fps
@@ -321,6 +328,20 @@ class QtCapture:
             cv2.line(PrimRGB_frame, (detectX1, detectY1), (detectX2, detectY2), detectLine_color, thick)
             cv2.line(PrimRGB_frame, (registX1, registY1), (registX2, registY2), registLine_color, thick)
 
+        # -- [x] Shadow Removal ---------------------------------#
+        # IS    :
+        # FS    :
+        NSVDI = True
+        shadowThreshold = 0.25
+        if NSVDI and self.getShadow():
+            hsvShadowRemoval = sr.hsvPassShadowRemoval(PrimRGB_frame, shadowThreshold)
+            shadowBitwiseAND = cv2.bitwise_and(hsvShadowRemoval, bin_frame)
+            bin_frame = shadowBitwiseAND
+        elif not NSVDI and self.getShadow():
+            yuvShadowRemoval = sr.yuvPassShadowRemoval(PrimRGB_frame, shadowThreshold)
+            shadowBitwiseAND = cv2.bitwise_and(yuvShadowRemoval, bin_frame)
+            bin_frame = shadowBitwiseAND
+
         # -- [x] Morphological Operation -------------------------#
         # IS    : ~
         # FS    : ~
@@ -480,9 +501,9 @@ class QtCapture:
             indexes = hungarian.compute(distance)
 
             for row, column in indexes:
-                self.currentListVehicle[row].lifetime = self.pastListVehicle[column].lifetime
-                # self.currentTrajectory[row].lifetime = self.pastTrajectory[column].lifetime
-                # if self.currentListVehicle[row].lifetime is False:
+                self.currentListVehicle[row].idState = self.pastListVehicle[column].idState
+                # self.currentTrajectory[row].idState = self.pastTrajectory[column].idState
+                # if self.currentListVehicle[row].idState is False:
                 #    self.pastTrajectory[row].xCoordinate = self.currentListVehicle[column].xCoordinate
                 #    self.pastTrajectory[row].yCoordinate = self.currentListVehicle[column].yCoordinate
                 #    self.tempTrajectory[row].xCoordinate = self.pastTrajectory[row].xCoordinate
@@ -491,7 +512,7 @@ class QtCapture:
                 #    self.pastTrajectory[row].xCoordinate = self.tempTrajectory[row].xCoordinate
                 #    self.pastTrajectory[row].yCoordinate = self.tempTrajectory[row].yCoordinate
 
-                # print "vID: {0} | lifetime: {1}".format(self.tempList[row].vehicleID, self.tempList[row].lifetime)
+                # print "vID: {0} | idState: {1}".format(self.tempList[row].vehicleID, self.tempList[row].idState)
 
             trackingStatus = True
 
@@ -534,12 +555,12 @@ class QtCapture:
                 yCentroid = self.currentListVehicle[i].yCoordinate
                 lengthVehicle = self.currentListVehicle[i].vehicleLength
                 vehicleClassification = self.currentListVehicle[i].vehicleClass
-                vehicleLifeTime = self.currentListVehicle[i].lifetime
+                idState = self.currentListVehicle[i].idState
 
                 xCenteroidBefore = self.pastTrajectory[i].xCoordinate
                 yCenteroidBefore = self.pastTrajectory[i].yCoordinate
 
-                print "vid count : {0} | lifetime: {1} | xCord: {2} | yCord: {3} | xLastCord: {4} | yLastCord: {5}".format(vehicleID, vehicleLifeTime, xCentroid, yCentroid, xCenteroidBefore, yCenteroidBefore)
+                print "vid count : {0} | idState: {1} | xCord: {2} | yCord: {3} | xLastCord: {4} | yLastCord: {5}".format(vehicleID, idState, xCentroid, yCentroid, xCenteroidBefore, yCenteroidBefore)
 
                 yPredictRegist = mo.funcY_line(registX1, registY1, registX2, registY2, xCentroid)
                 yPredictDetect = mo.funcY_line(detectX1, detectY1, detectX2, detectY2, xCentroid)
@@ -547,21 +568,21 @@ class QtCapture:
 
                 # print "predictRegist: {0} | predictDetect : {1}".format(yPredictRegist, yPredictDetect)
 
-                if (yCentroid < yPredictRegist + stopGap) and (yCentroid > yPredictDetect) and (xCentroid >= detectX1) and (xCentroid <= detectX2) and (vehicleLifeTime is False):
-                    self.pastListVehicle[i].lifetime = True
+                if (yCentroid < yPredictRegist + stopGap) and (yCentroid > yPredictDetect) and (xCentroid >= detectX1) and (xCentroid <= detectX2) and (idState is False):
+                    self.pastListVehicle[i].idState = True
 
                 if (yCentroid < yPredictRegist) and (xCentroid >= registX1) and (xCentroid <= registX2):
                     cv2.circle(PrimRGB_frame, (xCentroid, yCentroid), size, (0, 0, 255), thick)
                     cv2.putText(PrimRGB_frame, "{0}".format(vehicleID), (xCentroid + 1, yCentroid + 1), font, 1, (0, 0, 255))
 
-                if (yCentroid > yPredictRegist) and (xCentroid >= registX1) and (xCentroid <= registX2) and (vehicleLifeTime is True):
+                if (yCentroid > yPredictRegist) and (xCentroid >= registX1) and (xCentroid <= registX2) and (idState is True):
                     if countClass == "LV":
                         self.total_LV += 1
                     elif countClass == "HV":
                         self.total_HV += 1
 
                     self.totalVehicle = self.total_LV + self.total_HV
-                    self.pastListVehicle[i].lifetime = False
+                    self.pastListVehicle[i].idState = False
 
                     improc.addText(PrimRGB_frame, vehicleID, size, (xCentroid + 5), (yCentroid - 5))
                     cv2.line(PrimRGB_frame, (registX1, registY1), (registX2, registY2), changeRegistLine_color, changeThick)

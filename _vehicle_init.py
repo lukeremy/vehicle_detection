@@ -1,5 +1,5 @@
 class vehicle:
-    def __init__(self, vehicleID, xCoordinate, yCoordinate, vehicleLength, vehicleWidth, vehicleClass, xContour, yContour, widthContour, highContour, lifetime):
+    def __init__(self, vehicleID, xCoordinate, yCoordinate, vehicleLength, vehicleWidth, vehicleClass, xContour, yContour, widthContour, highContour, idState):
         self.vehicleID = vehicleID
         self.xCoordinate = xCoordinate
         self.yCoordinate = yCoordinate
@@ -10,4 +10,4 @@ class vehicle:
         self.yContour = yContour
         self.widthContour = widthContour
         self.highContour = highContour
-        self.lifetime = lifetime
+        self.idState = idState
