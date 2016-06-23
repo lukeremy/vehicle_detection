@@ -63,7 +63,7 @@ def vertikalPinHoleModel(height, focal, altitude, theta, y1, y2, maxHighLV, maxH
     else:
         X2G = estimationVehicleHigh * math.tan(math.radians(theta - delta2))
 
-    Lv = math.fabs(Lx1 - (Lx2 + X2G))
+    #Lv = math.fabs(Lx1 - (Lx2 + X2G))
 
     delta1 = round(delta1, 3)
     delta2 = round(delta2, 3)

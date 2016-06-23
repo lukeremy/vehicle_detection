@@ -35,6 +35,7 @@ class MainInit(QMainWindow, main_ui):
         # 1.1.  VideoInput
         self.radioButton_choseDevice.setChecked(True)
         self.radioButton_choseFile.setChecked(False)
+        self.checkBox_saveOutput.setChecked(False)
 
         self.radioButton_choseFile.toggled.connect(self.selectFile)
         self.radioButton_choseDevice.toggled.connect(self.selectDevice)
@@ -63,32 +64,22 @@ class MainInit(QMainWindow, main_ui):
 
         # 1.4   Data Input
         # 1.4.1 Camera
-        diagonalFOV = ["90", "127", "160"]
-        sensorType = ["APS-C", "1/3.2'"]
-        croppingFactor = ["1.0 x", "1.3 x", "1.5 x", "1.6 x", "2.0 x"]
+        sensorType = ["Nikon APS-C", "1/3.2'"]
+        croppingFactor = ["1.56 x", "2.0 x"]
 
-        self.setAlt(6)
-        self.setElevated(20)
+        self.setAlt(7)
+        self.setElevated(60)
         self.setFps(30)
         self.setFocal(18)
 
-        self.radioButton_focalLength.setChecked(True)
-        self.radioButton_fieldofview.setChecked(False)
-
-        self.comboBox_sensor.setEnabled(False)
         self.comboBox_sensor.addItems(sensorType)
         self.comboBox_sensor.setCurrentIndex(0)
-
-        self.lineEdit_focalCam.setEnabled(True)
-        self.comboBox_fov.setEnabled(False)
-        self.comboBox_fov.addItems(diagonalFOV)
-        self.comboBox_fov.setCurrentIndex(0)
+        self.comboBox_sensor.currentIndexChanged.connect(self.getSensoryType)
 
         self.comboBox_croppingFactor.setEnabled(True)
         self.comboBox_croppingFactor.addItems(croppingFactor)
-        self.comboBox_croppingFactor.setCurrentIndex(2)
-
-        self.radioButton_focalLength.toggled.connect(self.selectFocal)
+        self.comboBox_croppingFactor.setCurrentIndex(0)
+        self.comboBox_croppingFactor.currentIndexChanged.connect(self.getCroppingFactor)
 
         # 1.4.2 Vehicle Input
         # 1.4.2.1 Light Vehicle
@@ -168,17 +159,11 @@ class MainInit(QMainWindow, main_ui):
     def getFocal(self):
         return self.lineEdit_focalCam.text()
 
-    def setFOV(self, value):
-        self.comboBox_fov.currentText(format(value))
+    def setCurrentIndexSensorType(self, value):
+        self.comboBox_sensor.setCurrentIndex(int(value))
 
-    def getFOV(self):
-        return self.comboBox_fov.currentText()
-
-    def setCurrentIndexFOV(self, value):
-        self.comboBox_fov.setCurrentIndex(int(value))
-
-    def getCurrentIndexFOV(self):
-        return self.comboBox_fov.currentIndex()
+    def getCurrentIndexSensorType(self):
+        return self.comboBox_sensor.currentIndex()
 
     def setLengthLV(self, value):
         self.lineEdit_pLV.setText(format(value))
@@ -272,6 +257,31 @@ class MainInit(QMainWindow, main_ui):
             video_mode = "BIN"
         return video_mode
 
+    def getSensoryType(self):
+        select = self.comboBox_choseDevice.currentIndex()
+        if select == 0:
+            sensorHeight = 15.4
+            sensorWidth = 23.1
+        else:
+            sensorHeight = 0
+            sensorWidth = 0
+
+        return sensorHeight, sensorWidth
+
+    def getCroppingFactor(self):
+        select = self.comboBox_croppingFactor.currentIndex()
+        if select == 0:
+            croppingFactor = 1.56
+        elif select == 1:
+            croppingFactor = 2.0
+        else:
+            croppingFactor = 0
+
+        return croppingFactor
+
+    def getSavingOutput(self):
+        return self.checkBox_saveOutput.isChecked()
+
     def getBoundary(self):
         return self.checkBox_showboundaryVM.isChecked()
 
@@ -343,7 +353,6 @@ class MainInit(QMainWindow, main_ui):
             self.setElevated(elevated)
             self.setFps(fps)
             self.setFocal(focal)
-            self.setCurrentIndexFOV(index_fov)
 
             # 1.4.2 Vehicle Input
             # 1.4.2.1 Light Vehicle
@@ -372,15 +381,7 @@ class MainInit(QMainWindow, main_ui):
             alt = self.getAlt()
             elevated = self.getElevated()
             fps = self.getFps()
-
-            if self.radioButton_focalLength.isChecked():
-                focal = self.getFocal()
-                fov = 0
-            else:
-                fov = self.getFOV()
-                focal = 0
-
-            index_fov = self.getCurrentIndexFOV()
+            focal = self.getFocal()
 
             # Light vehicle dimension
             length_LV = self.getLengthLV()
@@ -409,7 +410,7 @@ class MainInit(QMainWindow, main_ui):
 
     # Function Tab 1. Setting
     def selectVideoFile(self):
-        file_filter = "Movie (*.mp4 *.avi *.mkv)"
+        file_filter = "Movie (*.mp4 *.avi *.mkv *.MOV)"
         videoFilename = QFileDialog.getOpenFileName(self, "Open video file", 'samples', file_filter, None,
                                                     QFileDialog.DontUseNativeDialog)
         if videoFilename:
@@ -452,21 +453,10 @@ class MainInit(QMainWindow, main_ui):
         else:
             self.comboBox_choseDevice.setEnabled(False)
 
-    def selectFocal(self, enabled):
-        if enabled:
-            self.comboBox_fov.setEnabled(False)
-            self.comboBox_sensor.setEnabled(False)
-            self.comboBox_croppingFactor.setEnabled(True)
-            self.lineEdit_focalCam.setEnabled(True)
-        else:
-            self.comboBox_fov.setEnabled(True)
-            self.comboBox_sensor.setEnabled(True)
-            self.comboBox_croppingFactor.setEnabled(False)
-            self.lineEdit_focalCam.setEnabled(False)
-
     def setSetting(self):
         # Get video mode
         video_mode = self.getVideoMode()
+        savingOutput = self.getSavingOutput()
         boundary = self.getBoundary()
         roi = self.getRoi()
         shadow = self.getShadowRemoval()
@@ -478,12 +468,9 @@ class MainInit(QMainWindow, main_ui):
         alt = float(self.getAlt())
         elevated = float(self.getElevated())
         fps = float(self.getFps())
-        if self.radioButton_focalLength.isChecked():
-            focal = float(self.getFocal())
-            fov = float(0)
-        else:
-            fov = float(self.getFOV())
-            focal = float(0)
+        sensorHeight, sensorWidth = self.getSensoryType()
+        croppingFactor = self.getCroppingFactor()
+        focal = float(self.getFocal())
 
         # Light vehicle dimension
         length_LV = float(self.getLengthLV())
@@ -502,9 +489,11 @@ class MainInit(QMainWindow, main_ui):
         print "Camera Input"
         print "video input: {0}".format(self.fileLoc)
         print "video mode: {0}".format(video_mode)
+        print "saving output: {0}".format(savingOutput)
         print "background subtraction: {0}".format(background_subtraction)
         print "boundary: {0} | roi: {1} | shadow removal: {2}".format(boundary, roi, shadow)
-        print "alt: {0} | elevated: {1} | fps: {2} | focal:{3} | fov: {4}".format(alt, elevated, fps, focal, fov)
+        print "sensor height: {0} | sensor width: {1} | cropping factor: {2} ".format(sensorHeight, sensorWidth, croppingFactor)
+        print "alt: {0} | elevated: {1} | fps: {2} | focal:{3}".format(alt, elevated, fps, focal)
         print "Vehicle Input"
         print "LV >> length: {0} | width: {1} | high: {2}".format(length_LV, width_LV, high_LV)
         print "HV >> length: {0} | width: {1} | high: {2}".format(length_HV, width_HV, high_HV)
@@ -533,6 +522,7 @@ class MainInit(QMainWindow, main_ui):
     def startVideo(self):
         # Get video mode
         video_mode = self.getVideoMode()
+        savingOutput = self.getSavingOutput()
         boundary = self.getBoundary()
         roi = self.getRoi()
         shadow = self.getShadowRemoval()
@@ -544,12 +534,9 @@ class MainInit(QMainWindow, main_ui):
         alt = float(self.getAlt())
         elevated = int(self.getElevated())
         fps = float(self.getFps())
-        if self.radioButton_focalLength.isChecked():
-            focal = float(self.getFocal())
-            fov = float(0)
-        else:
-            fov = float(self.getFOV())
-            focal = float(0)
+        sensorHeight, sensorWidth = self.getSensoryType()
+        croppingFactor = self.getCroppingFactor()
+        focal = float(self.getFocal())
 
         # Light vehicle dimension
         length_LV = float(self.getLengthLV())
@@ -560,7 +547,6 @@ class MainInit(QMainWindow, main_ui):
         length_HV = float(self.getLengthHV())
         width_HV = float(self.getWidthHV())
         high_HV = float(self.getHighHV())
-
         # Registration and detection line
         detectX1, detectY1, detectX2, detectY2 = self.getDetectLine()
         registX1, registY1, registX2, registY2 = self.getRegistrationLine()
@@ -579,6 +565,7 @@ class MainInit(QMainWindow, main_ui):
             self.tabWidget.setTabEnabled(2, False)
 
             self.capture.setVideoMode(video_mode)
+            self.capture.setVideoOutput(savingOutput)
             self.capture.setBackgroundSubtraction(background_subtraction)
             self.capture.setROI(roi)
             self.capture.setBoundary(boundary)
@@ -588,7 +575,8 @@ class MainInit(QMainWindow, main_ui):
             self.capture.setAlt(alt)
             self.capture.setElevated(elevated)
             self.capture.setFocal(focal)
-            self.capture.setFOV(fov)
+            self.capture.setSensorSize(sensorHeight, sensorWidth)
+            self.capture.setCroppingFactor(croppingFactor)
 
             self.capture.setLengthLV(length_LV)
             self.capture.setWidthLV(width_LV)

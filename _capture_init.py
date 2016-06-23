@@ -23,6 +23,12 @@ class QtCapture:
     def getVideoMode(self):
         return self.video_mode
 
+    def setVideoOutput(self, video_output):
+        self.video_output = video_output
+
+    def getVideoOutput(self):
+        return self.video_output
+
     def setBackgroundSubtraction(self, backgroundSubtraction):
         self.backgroundSubtracion = backgroundSubtraction
 
@@ -71,11 +77,18 @@ class QtCapture:
     def getFocal(self):
         return self.focal
 
-    def setFOV(self, fov):
-        self.fov = fov
+    def setSensorSize(self, height, width):
+        self.sensorHeight = height
+        self.sensorWidth = width
 
-    def getFOV(self):
-        return self.fov
+    def getSensorSize(self):
+        return self.sensorHeight, self.sensorWidth
+
+    def setCroppingFactor(self, croppingFactor):
+        self.croppingfFactor = croppingFactor
+
+    def getCroppingFactor(self):
+        return self.croppingfFactor
 
     def setLengthLV(self, lenghtLV):
         self.lengthLV = lenghtLV
@@ -163,6 +176,7 @@ class QtCapture:
         self.pastTrajectory = []
 
         # Start Capture Video
+        self.filename = filename
         self.cap = cv2.VideoCapture(filename)
         self.statusNextFrame = True
 
@@ -174,19 +188,6 @@ class QtCapture:
         self.firstFrame = 0
         self.endFrame = 0
         self.processTime = 0
-
-        # Initiation file
-        now = datetime.datetime.now()
-        formatDate = now.strftime("%d-%m-%Y %H-%M")
-        # self.file = open("output/{0}.csv".format(formatDate), "a")
-        # if os.stat("output/{0}.csv".format(formatDate)).st_size == 0:
-        #    self.file.write("No,Waktu,Jenis Kendaraan,Panjang,Lebar,Gambar\n")
-
-        # Initiation folder
-        path = "output"
-        # self.formatFolder = now.strftime("{0}/%d-%m-%Y %H-%M").format(path)
-        # if not os.path.isdir(self.formatFolder):
-        #   os.makedirs(self.formatFolder)
 
         # Initiation to moving average
         _, PrimImg_frame = self.cap.read()
@@ -202,6 +203,20 @@ class QtCapture:
         self.timer.timeout.connect(self.timeEndFrame)
         self.start_time = time.time()
 
+        # Initiation file
+        if self.getVideoOutput():
+            now = datetime.datetime.now()
+            formatDate = now.strftime("%d-%m-%Y %H-%M")
+            self.file = open("output/{0}.csv".format(formatDate), "a")
+            if os.stat("output/{0}.csv".format(formatDate)).st_size == 0:
+                self.file.write("No,Waktu,Jenis Kendaraan,Panjang,Gambar\n")
+
+            # Initiation folder
+            path = "output"
+            self.formatFolder = now.strftime("{0}/%d-%m-%Y %H-%M").format(path)
+            if not os.path.isdir(self.formatFolder):
+                os.makedirs(self.formatFolder)
+
     def stop(self):
         self.timer.stop()
 
@@ -215,22 +230,25 @@ class QtCapture:
         return self.processTime
 
     def deleteLater(self):
-        self.frame = 0
-        self.total_HV = 0
-        self.total_LV = 0
         # Stop capture
         self.cap.release()
 
         # Closing file
-        # self.file.write("FOV:" + "," + str(self.getFOV()) + "\n" +
-        #               "Focal:" + "," + str(self.getFocal()) + "\n" +
-        #               "Angle:" + "," + str(self.getElevated()) + "\n" +
-        #               "Altitude:" + "," + str(self.getAlt()) + "\n" +
-        #               "Total LV:" + "," + str(self.total_LV) + "\n" +
-        #               "Total HV:" + "," + str(self.total_HV) + "\n" +
-        #               "Total Vehicle:" + "," + str(self.total_HV + self.total_LV) + "\n")
-        # self.file.flush()
-        # self.file.close()
+        if self.getVideoOutput():
+            self.file.write("Filename:" + "," + str(self.filename) + "\n" +
+                            "FOV:" + "," + str(self.getFOV()) + "\n" +
+                            "Focal:" + "," + str(self.getFocal()) + "\n" +
+                            "Angle:" + "," + str(self.getElevated()) + "\n" +
+                            "Altitude:" + "," + str(self.getAlt()) + "\n" +
+                            "Total LV:" + "," + str(self.total_LV) + "\n" +
+                            "Total HV:" + "," + str(self.total_HV) + "\n" +
+                            "Total Vehicle:" + "," + str(self.total_HV + self.total_LV) + "\n")
+            self.file.flush()
+            self.file.close()
+
+        self.total_HV = 0
+        self.total_LV = 0
+        self.frame = 0
 
     def getNextStatusFrame(self):
         totalFrame = self.cap.get(cv2.CAP_PROP_FRAME_COUNT)
@@ -403,9 +421,10 @@ class QtCapture:
             # -- [x] Pin Hole Model -------------------------#
             # IS    :
             # FS    :
-            fov = self.getFOV()
-            focal = self.getFocal() * 3.779527559055
+            focal = self.getFocal()
             theta = self.getElevated()
+            sensorHeight, sensorWidth = self.getSensorSize()
+            cropFactor = self.getCroppingFactor()
             altitude = self.getAlt()
             maxHighLV = self.getHighLV()
             maxHighHV = self.getHighHV()
@@ -416,17 +435,13 @@ class QtCapture:
             x1Vehicle = (yContour + highContour)
             x2Vehicle = yContour
 
-            if self.getFocal() == 0.0:
-                horizontalFOV, verticalFOV = mo.transformDiagonalFOV(fov)
-                focal = mo.getFocalfromFOV(self.height_frame, verticalFOV)
+            aspectRatioHeight = (sensorWidth / self.width_frame) * self.height_frame
+            horizontalFocal = (focal / aspectRatioHeight) * self.height_frame
+            verticalFocal = (focal / sensorWidth) * self.width_frame
 
-            lengthVehicle = mo.vertikalPinHoleModel(self.height_frame, focal, altitude, theta, x1Vehicle, x2Vehicle, maxHighLV, maxHighHV, maxLengthLV)
-            centerVehicle = mo.centeroidPinHoleMode(self.height_frame, focal, altitude, theta, (yContour + highContour))
-
-            if self.getFocal() == 0.0:
-                focal = mo.getFocalfromFOV(self.width_frame, horizontalFOV)
-
-            widthVehicle = mo.horizontalPinHoleModel(self.width_frame, focal, altitude, xContour, (xContour + widthContour), centerVehicle)
+            lengthVehicle = mo.vertikalPinHoleModel(self.height_frame, horizontalFocal, altitude, theta, x1Vehicle, x2Vehicle, maxHighLV, maxHighHV, maxLengthLV)
+            centerVehicle = mo.centeroidPinHoleMode(self.height_frame, horizontalFocal, altitude, theta, (yContour + highContour))
+            widthVehicle = mo.horizontalPinHoleModel(self.width_frame, verticalFocal, altitude, xContour, (xContour + widthContour), centerVehicle)
 
             # -- [x] Draw Boundary -----------------------#
             # IS    :
@@ -437,7 +452,7 @@ class QtCapture:
             size = 2
             areaThreshold = 40
 
-            if (widthVehicle >= 1.5) and (widthVehicle <= 8.0) and (lengthVehicle >= 1.5) and (lengthVehicle < maxLengthHV) and (areaContours >= (float(areaBoundary) * (float(areaThreshold) / 100))):
+            if (widthVehicle >= 0.5) and (widthVehicle <= 8.0) and (lengthVehicle >= 1.5) and (lengthVehicle < maxLengthHV) and (areaContours >= (float(areaBoundary) * (float(areaThreshold) / 100))):
                 # Get moment for centroid
                 Moment = cv2.moments(cnt)
                 xCentroid = int(Moment['m10'] / Moment['m00'])
@@ -544,7 +559,7 @@ class QtCapture:
         font = cv2.FONT_HERSHEY_DUPLEX
         thick = 2
         size = 2
-        stopGap = 20
+        stopGap = 40
         changeRegistLine_color = (255, 255, 255)
         changeThick = 4
 
@@ -560,7 +575,7 @@ class QtCapture:
                 xCenteroidBefore = self.pastTrajectory[i].xCoordinate
                 yCenteroidBefore = self.pastTrajectory[i].yCoordinate
 
-                print "vid count : {0} | idState: {1} | xCord: {2} | yCord: {3} | xLastCord: {4} | yLastCord: {5}".format(vehicleID, idState, xCentroid, yCentroid, xCenteroidBefore, yCenteroidBefore)
+                # print "vid count : {0} | idState: {1} | xCord: {2} | yCord: {3} | xLastCord: {4} | yLastCord: {5}".format(vehicleID, idState, xCentroid, yCentroid, xCenteroidBefore, yCenteroidBefore)
 
                 yPredictRegist = mo.funcY_line(registX1, registY1, registX2, registY2, xCentroid)
                 yPredictDetect = mo.funcY_line(detectX1, detectY1, detectX2, detectY2, xCentroid)
@@ -568,7 +583,7 @@ class QtCapture:
 
                 # print "predictRegist: {0} | predictDetect : {1}".format(yPredictRegist, yPredictDetect)
 
-                if (yCentroid < yPredictRegist + stopGap) and (yCentroid > yPredictDetect) and (xCentroid >= detectX1) and (xCentroid <= detectX2) and (idState is False):
+                if (yCentroid > yPredictRegist - stopGap) and (yCentroid < yPredictRegist) and (xCentroid >= registX1) and (xCentroid <= registX2) and (idState is False):
                     self.pastListVehicle[i].idState = True
 
                 if (yCentroid < yPredictRegist) and (xCentroid >= registX1) and (xCentroid <= registX2):
@@ -596,24 +611,24 @@ class QtCapture:
                     widthContour = self.currentListVehicle[i].widthContour
                     highContour = self.currentListVehicle[i].highContour
 
-                    now = datetime.datetime.now()
-                    formatDate = now.strftime("%d%m%Y_%H%M%S")
+                    if self.getVideoOutput():
+                        now = datetime.datetime.now()
+                        formatDate = now.strftime("%d%m%Y_%H%M%S")
 
-                    # formatFileName = "{0}/{1}_{2:03}_{3}.jpg".format(self.formatFolder, countClass, (self.total_LV + self.total_HV), formatDate)
-                    # cropping_frame = PrimResize_frame[yContour:yContour + highContour, xContour:xContour + widthContour]
-                    # cv2.imwrite(formatFileName, cropping_frame)
+                        formatFileName = "{0}/{1}_{2:03}_{3}.jpg".format(self.formatFolder, countClass, (self.total_LV + self.total_HV), formatDate)
+                        cropping_frame = PrimResize_frame[yContour:yContour + highContour, xContour:xContour + widthContour]
+                        cv2.imwrite(formatFileName, cropping_frame)
 
-                    # -- [x] Save Filename to Text --------------#
-                    # IS    :
-                    # FS    :
-                    formatDate = now.strftime("%d:%m:%Y %H:%M:%S")
-                    # self.file.write(str(self.totalVehicle) + "," +
-                    #               str(formatDate) + "," +
-                    #               str(countClass) + "," +
-                    #               str(lengthVehicle) + "," +
-                    #               str(widthVehicle) + "," +
-                    #               str(formatFileName) + "\n")
-                    # self.file.flush()
+                        # -- [x] Save Filename to Text --------------#
+                        # IS    :
+                        # FS    :
+                        formatDate = now.strftime("%d:%m:%Y %H:%M:%S")
+                        self.file.write(str(self.totalVehicle) + "," +
+                                        str(formatDate) + "," +
+                                        str(countClass) + "," +
+                                        str(lengthVehicle) + "," +
+                                        str(formatFileName) + "\n")
+                        self.file.flush()
 
         # Return variable
         self.currentListVehicle = []
