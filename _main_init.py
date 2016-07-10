@@ -67,8 +67,8 @@ class MainInit(QMainWindow, main_ui):
         sensorType = ["Nikon APS-C", "1/3.2'"]
         croppingFactor = ["1.56 x", "2.0 x"]
 
-        self.setAlt(7)
-        self.setElevated(60)
+        self.setAlt(7.4)
+        self.setElevated(72)
         self.setFps(30)
         self.setFocal(18)
 
@@ -83,13 +83,13 @@ class MainInit(QMainWindow, main_ui):
 
         # 1.4.2 Vehicle Input
         # 1.4.2.1 Light Vehicle
-        self.setLengthLV(6)
+        self.setLengthLV(6.2)
         self.setWidthLV(2.1)
         self.setHighLV(1.6)
         # 1.4.2.1 Heavy Vehicle
         self.setLengthHV(18)
         self.setWidthHV(2.5)
-        self.setHighHV(4.2)
+        self.setHighHV(3.2)
 
         # 1.4.3 Registration and Detection Line
         self.pushButton_preview.clicked.connect(self.previewVideo)
@@ -337,11 +337,11 @@ class MainInit(QMainWindow, main_ui):
             parsing = open(openConfigFilename, "r").read()
             split = parsing.split(" ")
 
-            altitude, elevated, fps, focal, fov, index_fov = split[0], split[1], split[2], split[3], split[4], split[5]
-            length_LV, width_LV, high_LV = split[6], split[7], split[8]
-            length_HV, width_HV, high_HV = split[9], split[10], split[11]
-            detectX1, detectY1, detectX2, detectY2 = split[12], split[13], split[14], split[15]
-            registX1, registY1, registX2, registY2 = split[16], split[17], split[18], split[19]
+            altitude, elevated, fps, focal = split[0], split[1], split[2], split[3]
+            length_LV, width_LV, high_LV = split[4], split[5], split[6]
+            length_HV, width_HV, high_HV = split[7], split[8], split[9]
+            detectX1, detectY1, detectX2, detectY2 = split[10], split[11], split[12], split[13]
+            registX1, registY1, registX2, registY2 = split[14], split[14], split[15], split[17]
 
             if focal != "0":
                 self.radioButton_focalLength.setChecked(True)
@@ -398,8 +398,8 @@ class MainInit(QMainWindow, main_ui):
             registX1, registY1, registX2, registY2 = self.getRegistrationLine()
 
             saveFile.write(
-                "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17} {18} {19}".format(
-                    alt, elevated, fps, focal, fov, index_fov, length_LV, width_LV, high_LV, length_HV, width_HV,
+                "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17}".format(
+                    alt, elevated, fps, focal, length_LV, width_LV, high_LV, length_HV, width_HV,
                     high_HV,
                     detectX1, detectY1, detectX2, detectY2, registX1, registY1, registX2, registY2
                 ))

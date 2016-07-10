@@ -1,18 +1,17 @@
-import ShadowRemoval
 import cv2
-import numpy
-import os
+import shadow_removal
 
-img_path = raw_input("Please Enter Image Path: ")
-assert os.path.exists(img_path), "img_path does not exists"
+fileori = "ori.jpg"
+filehsv = "hsvframe.jpg"
+# 1. HSV
+ori = cv2.imread(fileori)
+hsv = cv2.cvtColor(ori, cv2.COLOR_RGB2HSV)
 
-filename = "samples/LV1.jpg"
-img = cv2.imread(img_path)
-# Processing Image
-res, val = ShadowRemoval.process(img)
-print "{0}% of this image is shaded".format(int(100*val))
-# Display Images
-ShadowRemoval.scripts.display("img", img)
-ShadowRemoval.scripts.display("res", res)
+hue, sat, val = cv2.split(hsv)
+shadow = shadow_removal.hsvPassShadowRemoval(ori, 0.6)
+
+cv2.imshow("hsv", shadow)
+cv2.imwrite("shadow.jpg", shadow)
+
 cv2.waitKey(0)
-
+cv2.destroyAllWindows()

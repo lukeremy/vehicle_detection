@@ -2,9 +2,11 @@ import cv2
 import numpy as np
 
 def hsvPassShadowRemoval(src, shadowThreshold):
+    blurLevel = 3
     height, width = src.shape[:2]
     imgHSV = cv2.cvtColor(src, cv2.COLOR_RGB2HSV)
-    hueImg, satImg, valImg = cv2.split(imgHSV)
+    gaussianBlur = cv2.GaussianBlur(imgHSV, (blurLevel, blurLevel), 0)
+    hueImg, satImg, valImg = cv2.split(gaussianBlur)
 
     NSVDI = np.zeros((height, width, 1), np.uint8)
     count = height * width
@@ -14,7 +16,7 @@ def hsvPassShadowRemoval(src, shadowThreshold):
         #       sat = int(satImg[i, j])
         #       val = int(valImg[i, j])
         #       NSVDI[i, j] = (satImg[i, j] - valImg[i, j]) / ((satImg[i, j] + valImg[i, j]) * 1.0)
-        NSVDI = (satImg - valImg) / ((satImg + valImg) * 1)
+        NSVDI = (satImg + valImg) / ((satImg - valImg) * 1)
     thresh = np.sum(NSVDI)
     avg = thresh / (count * 1.0)
 
@@ -35,7 +37,7 @@ def hsvPassShadowRemoval(src, shadowThreshold):
         avg = shadowThreshold
 
     np.where(NSVDI > avg, 255, 0)
-    _, threshold = cv2.threshold(NSVDI, avg, 255, cv2.THRESH_BINARY)
+    _, threshold = cv2.threshold(NSVDI, avg, 255, cv2.THRESH_BINARY_INV)
 
     output = threshold
     return output

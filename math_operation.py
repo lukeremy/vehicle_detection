@@ -13,7 +13,7 @@ def centeroidPinHoleMode(height, focal, altitude, theta, yCoordinate):
 
     delta = math.degrees(math.atan(math.fabs(yCoordinate - (height / 2)) / focal))
 
-    if yCoordinate <= height / 2:
+    if yCoordinate >= height / 2:
         lCentroid = altitude * math.tan(math.radians(theta + delta))
     else:
         lCentroid = altitude * math.tan(math.radians(theta - delta))
@@ -24,7 +24,7 @@ def centeroidPinHoleMode(height, focal, altitude, theta, yCoordinate):
     if (theta + delta) > 90.0:
         Lcenteroid = "unknown length"
 
-    # print "delta: {0} | lCentroid: {1}".format(delta, lCentroid)
+    #print "delta: {0} | lCentroid: {1}".format(delta, lCentroid)
     return lCentroid
 
 def vertikalPinHoleModel(height, focal, altitude, theta, y1, y2, maxHighLV, maxHighHV, maxLengthLV):
@@ -38,41 +38,47 @@ def vertikalPinHoleModel(height, focal, altitude, theta, y1, y2, maxHighLV, maxH
     # Lx2 -> |O'X2| : jarak titik blindspot belakang kendaraan (m)
     # X2G -> |X2G| : jarak belakang kendaraan dengan titik blindspot belakang kendaraan (m)
 
-    delta1 = math.degrees(math.atan(math.fabs(y1 - (height / 2)) / focal))
-    delta2 = math.degrees(math.atan(math.fabs(y2 - (height / 2)) / focal))
+    delta1 = math.degrees(math.atan(math.fabs((height / 2) - y1) / focal))
+    delta2 = math.degrees(math.atan(math.fabs((height / 2) - y2) / focal))
 
-    if y1 <= height / 2:
+    if y1 >= height / 2:
         Lx1 = altitude * math.tan(math.radians(theta + delta1))
     else:
         Lx1 = altitude * math.tan(math.radians(theta - delta1))
 
-    if y2 <= height / 2:
+    if y2 >= height / 2:
         Lx2 = altitude * math.tan(math.radians(theta + delta2))
     else:
         Lx2 = altitude * math.tan(math.radians(theta - delta2))
 
     Lv = math.fabs(Lx1 - Lx2)
 
-    if Lv <= maxLengthLV:
-        estimationVehicleHigh = maxHighLV
-    else:
-        estimationVehicleHigh = maxHighHV
-
     if y2 >= height / 2:
-        X2G = estimationVehicleHigh * math.tan(math.radians(theta + delta2))
+        X2GLV = maxHighLV * math.tan(math.radians(theta + delta2))
+        X2GHV = maxHighHV * math.tan(math.radians(theta + delta2))
     else:
-        X2G = estimationVehicleHigh * math.tan(math.radians(theta - delta2))
+        X2GLV = maxHighLV * math.tan(math.radians(theta - delta2))
+        X2GHV = maxHighHV * math.tan(math.radians(theta - delta2))
 
-    #Lv = math.fabs(Lx1 - (Lx2 + X2G))
+    LengthLV = (Lx2 - (Lx1 + X2GLV))
+    LengthHV = (Lx2 - (Lx1 + X2GHV))
+
+    if LengthLV <= maxLengthLV:
+        Lv = LengthLV
+    else:
+        Lv = LengthLV
+
+    Lv = Lx2 - Lx1
 
     delta1 = round(delta1, 3)
     delta2 = round(delta2, 3)
     Lx1 = round(Lx1, 4)
     Lx2 = round(Lx2, 4)
-    X2G = round(X2G, 4)
+    X2GLV = round(X2GLV, 4)
+    X2GHV = round(X2GHV, 4)
     Lv = round(Lv, 3)
 
-    # print "delta1: {0} | delta2: {1} | Lx1: {2} | Lx2: {3} | X2G: {4} | Lv: {5}".format(delta1, delta2, Lx1, Lx2, X2G, Lv)
+    #print "delta1: {0} | delta2: {1} | Lx1: {2} | Lx2: {3} | X2GLV: {4} | X2GHVC: {5}| Lv: {6}".format(delta1, delta2, Lx1, Lx2, X2GLV, X2GHV, Lv)
     return Lv
 
 def horizontalPinHoleModel(width, focal, altitude, x1, x2, lengthObject):
@@ -107,7 +113,7 @@ def horizontalPinHoleModel(width, focal, altitude, x1, x2, lengthObject):
     Lw1 = round(Lw1, 4)
     Lw2 = round(Lw2, 4)
 
-    # print "delta1: {0} | delta2: {1} | Length: {2} | OX: {3} | Lw1: {4} | Lw2: {5} | widthObject: {6}".format(delta1, delta2, lengthObject, OX, Lw1, Lw2, widthObject)
+    #print "delta1: {0} | delta2: {1} | Length: {2} | OX: {3} | Lw1: {4} | Lw2: {5} | widthObject: {6}".format(delta1, delta2, lengthObject, OX, Lw1, Lw2, widthObject)
     return widthObject
 
 def funcY_line(x1, y1, x2, y2, X):
@@ -172,3 +178,9 @@ def distancetwoPoint(x1, y1, x2, y2):
 
     return distance
 
+def determineCropFactor(sensorwidth, sensorheight):
+    # Comparison between 35mm lens
+    # FX : 35mm * 26mm sensor size
+    cropfactor = math.sqrt(math.pow(36, 2) + math.pow(24, 2)) / math.sqrt(math.pow(sensorheight, 2) + math.pow(sensorwidth, 2))
+
+    return cropfactor

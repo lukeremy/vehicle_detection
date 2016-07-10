@@ -332,6 +332,8 @@ class QtCapture:
             # medianFilter = cv2.medianBlur(MOG_frame, 21)
 
         bin_frame = threshold.copy()
+        blank_frame = np.zeros((self.height_frame, self.width_frame, 1), np.uint8)
+
         # -- [x] Draw Detection and RegistrationLine -------------#
         # IS    :
         # FS    :
@@ -346,20 +348,6 @@ class QtCapture:
             cv2.line(PrimRGB_frame, (detectX1, detectY1), (detectX2, detectY2), detectLine_color, thick)
             cv2.line(PrimRGB_frame, (registX1, registY1), (registX2, registY2), registLine_color, thick)
 
-        # -- [x] Shadow Removal ---------------------------------#
-        # IS    :
-        # FS    :
-        NSVDI = True
-        shadowThreshold = 0.25
-        if NSVDI and self.getShadow():
-            hsvShadowRemoval = sr.hsvPassShadowRemoval(PrimRGB_frame, shadowThreshold)
-            shadowBitwiseAND = cv2.bitwise_and(hsvShadowRemoval, bin_frame)
-            bin_frame = shadowBitwiseAND
-        elif not NSVDI and self.getShadow():
-            yuvShadowRemoval = sr.yuvPassShadowRemoval(PrimRGB_frame, shadowThreshold)
-            shadowBitwiseAND = cv2.bitwise_and(yuvShadowRemoval, bin_frame)
-            bin_frame = shadowBitwiseAND
-
         # -- [x] Morphological Operation -------------------------#
         # IS    : ~
         # FS    : ~
@@ -368,19 +356,31 @@ class QtCapture:
             [1, 1, 1],
             [0, 1, 0]], dtype=np.uint8)
 
-        morph_frame = cv2.erode(bin_frame, kernel, iterations=1)
-        morph_frame = cv2.dilate(morph_frame, kernel, iterations=2)
-        morph_frame = cv2.erode(morph_frame, kernel, iterations=2)
+        morph_frame = cv2.erode(bin_frame, kernel, iterations=3)
+        #morph_frame = cv2.dilate(morph_frame, kernel, iterations=2)
+        bin_frame = morph_frame
 
+        # -- [x] Shadow Removal ---------------------------------#
+        # IS    :
+        # FS    :
         kernel = np.array([
+            [0, 1, 0],
             [1, 1, 1],
-            [1, 1, 1],
-            [1, 1, 1]], dtype=np.uint8)
+            [0, 1, 0]], dtype=np.uint8)
+        shadowThreshold = 0.1
+        maskBin = cv2.merge([bin_frame, bin_frame,bin_frame])
+        maskRgbAndBin = cv2.bitwise_and(PrimRGB_frame, maskBin)
 
-        morph_frame = cv2.erode(morph_frame, kernel, iterations=2)
-        morph_frame = cv2.dilate(morph_frame, kernel, iterations=2)
-        morph_frame = cv2.erode(morph_frame, kernel, iterations=1)
-        morph_frame = cv2.dilate(morph_frame, kernel, iterations=2)
+        if self.getShadow():
+            hsvShadowRemoval = sr.hsvPassShadowRemoval(maskRgbAndBin, shadowThreshold)
+            hsvMerge = cv2.merge([hsvShadowRemoval, hsvShadowRemoval, hsvShadowRemoval])
+
+            maskShadow = cv2.bitwise_and(maskRgbAndBin, hsvMerge)
+            gaussianBlur_shadowFrame = cv2.GaussianBlur(maskShadow, (5, 5), 0)
+            grayShadow = cv2.cvtColor(gaussianBlur_shadowFrame, cv2.COLOR_RGB2GRAY)
+            _, thresholdShadow = cv2.threshold(grayShadow, 5, 255, cv2.THRESH_BINARY)
+            dilateShadow = cv2.dilate(thresholdShadow, kernel, iterations=3)
+            bin_frame = dilateShadow
 
         # -- [x] Mask Boundary ROI ------------------------------#
         # IS    : ~
@@ -432,16 +432,36 @@ class QtCapture:
             maxLengthHV = self.getLengthHV()
             maxWidthHV = self.getWidthHV()
 
-            x1Vehicle = (yContour + highContour)
-            x2Vehicle = yContour
+            heightInFullFrame = (self.width_frame * 2.0) / 3
+            heightSurplus = (heightInFullFrame - self.height_frame) / 2
 
-            aspectRatioHeight = (sensorWidth / self.width_frame) * self.height_frame
-            horizontalFocal = (focal / aspectRatioHeight) * self.height_frame
+            x1Vehicle = (self.height_frame + heightSurplus) - (yContour + highContour)
+            x2Vehicle = (self.height_frame + heightSurplus) - yContour
+
+            aspectRatioHeight = (sensorWidth / self.width_frame) * heightInFullFrame
+            cropFactor = mo.determineCropFactor(self.sensorWidth, self.sensorHeight)
+            horizontalFocal = (((focal * 1) / aspectRatioHeight) * self.height_frame)
             verticalFocal = (focal / sensorWidth) * self.width_frame
 
-            lengthVehicle = mo.vertikalPinHoleModel(self.height_frame, horizontalFocal, altitude, theta, x1Vehicle, x2Vehicle, maxHighLV, maxHighHV, maxLengthLV)
-            centerVehicle = mo.centeroidPinHoleMode(self.height_frame, horizontalFocal, altitude, theta, (yContour + highContour))
-            widthVehicle = mo.horizontalPinHoleModel(self.width_frame, verticalFocal, altitude, xContour, (xContour + widthContour), centerVehicle)
+            lengthVehicle = mo.vertikalPinHoleModel(heightInFullFrame, horizontalFocal, altitude, theta, x1Vehicle, x2Vehicle, maxHighLV, maxHighHV, maxLengthLV)
+            centerVehicle = mo.centeroidPinHoleMode(heightInFullFrame, horizontalFocal, altitude, theta, (yContour + highContour))
+            widthVehicle = mo.horizontalPinHoleModel(self.width_frame, verticalFocal, altitude, xContour, (xContour + widthContour), centerVehicle) * 2.5
+
+            alternative = True
+            if alternative:
+                fov = 160.0
+
+                theta = 90.0 - theta
+
+                horizontalFOV, verticalFOV = mo.transformDiagonalFOV(fov)
+                focal = mo.getFocalfromFOV(self.height_frame, verticalFOV)
+
+                lengthVehicle = mo.vertikalPinHoleModel(self.height_frame, focal, altitude, theta, x1Vehicle, x2Vehicle,
+                                                    maxHighLV, maxHighHV, maxLengthLV)
+                centerVehicle = mo.centeroidPinHoleMode(self.height_frame, focal, altitude, theta, (yContour + highContour))
+
+                focal = mo.getFocalfromFOV(self.width_frame, horizontalFOV)
+                widthVehicle = mo.horizontalPinHoleModel(self.width_frame, focal, altitude, xContour, (xContour + widthContour), centerVehicle)
 
             # -- [x] Draw Boundary -----------------------#
             # IS    :
@@ -452,11 +472,13 @@ class QtCapture:
             size = 2
             areaThreshold = 40
 
-            if (widthVehicle >= 0.5) and (widthVehicle <= 8.0) and (lengthVehicle >= 1.5) and (lengthVehicle < maxLengthHV) and (areaContours >= (float(areaBoundary) * (float(areaThreshold) / 100))):
+            if (widthVehicle >= 1.5) and (widthVehicle <= 13.0) and (lengthVehicle >= 2) and (lengthVehicle < 80) and (areaContours >= (float(areaBoundary) * (float(areaThreshold) / 100))):
                 # Get moment for centroid
                 Moment = cv2.moments(cnt)
                 xCentroid = int(Moment['m10'] / Moment['m00'])
                 yCentroid = int(Moment['m01'] / Moment['m00'])
+
+                # print "length: {0} | width: {1}".format(lengthVehicle, widthVehicle)
 
                 # -- [x] Vehicle Classification -------------#
                 # IS    :
@@ -517,15 +539,6 @@ class QtCapture:
 
             for row, column in indexes:
                 self.currentListVehicle[row].idState = self.pastListVehicle[column].idState
-                # self.currentTrajectory[row].idState = self.pastTrajectory[column].idState
-                # if self.currentListVehicle[row].idState is False:
-                #    self.pastTrajectory[row].xCoordinate = self.currentListVehicle[column].xCoordinate
-                #    self.pastTrajectory[row].yCoordinate = self.currentListVehicle[column].yCoordinate
-                #    self.tempTrajectory[row].xCoordinate = self.pastTrajectory[row].xCoordinate
-                #    self.tempTrajectory[row].yCoordinate = self.pastTrajectory[row].yCoordinate
-                # else:
-                #    self.pastTrajectory[row].xCoordinate = self.tempTrajectory[row].xCoordinate
-                #    self.pastTrajectory[row].yCoordinate = self.tempTrajectory[row].yCoordinate
 
                 # print "vID: {0} | idState: {1}".format(self.tempList[row].vehicleID, self.tempList[row].idState)
 
@@ -549,17 +562,13 @@ class QtCapture:
             if (yTrajectory < yPredictTrajectory) and (xTrajectory >= registX1) and (xTrajectory <= registX2):
                 cv2.circle(PrimRGB_frame, (xTrajectory, yTrajectory), size, (0, 255, 255), thick)
 
-        # -- [x] Speed Detection --------------------------------#
-        # IS    :
-        # FS    :
-
         # -- [x] Counting Detection -----------------------------#
         # IS    :
         # FS    :
         font = cv2.FONT_HERSHEY_DUPLEX
         thick = 2
         size = 2
-        stopGap = 40
+        stopGap = 30
         changeRegistLine_color = (255, 255, 255)
         changeThick = 4
 
